@@ -1,0 +1,15 @@
+{
+  "name": "puppenstube",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lern-App fürs iPad: Minus rechnen bis 1000 mit Puppe und Puppenhaus (Klasse 3)",
+  "scripts": {
+    "test": "node tools/test-logic.mjs && node tools/test-version.mjs && node tools/e2e.mjs && node tools/e2e-speicher.mjs && node tools/e2e-geraete.mjs && node tools/test-offline.mjs && node tools/test-rahmen.mjs && node tools/monkey.mjs 300 1",
+    "test:logik": "node tools/test-logic.mjs && node tools/test-version.mjs",
+    "symbole": "node tools/icons.mjs",
+    "start": "npx --yes http-server public -p 8080 -c-1"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
