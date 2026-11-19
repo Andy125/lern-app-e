@@ -1,6 +1,6 @@
 # Puppenstube
 
-Lern-App fürs iPad für eine Schülerin der 3. Klasse (Minus rechnen bis 1000). Reines JavaScript ohne Build in `public/`, Tests in `tools/`, Veröffentlichung über GitHub Pages.
+Lern-App fürs iPad für eine Schülerin der 3. Klasse (Minus rechnen bis 1000, Französisch-Vokabeln in `public/franz.js`). Reines JavaScript ohne Build in `public/`, Tests in `tools/`, Veröffentlichung über GitHub Pages.
 
 - Für jede Änderung den Skill `puppenstube-release` befolgen, für neue Aufgaben oder Themen zuerst `puppenstube-inhalte`.
 - Vor jedem Merge den Vater fragen.

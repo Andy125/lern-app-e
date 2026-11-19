@@ -25,12 +25,21 @@ for (const [name, w, h] of GERAETE) {
       P.ok(bb && bb.x >= 0 && bb.x + bb.width <= w + 1 && bb.width >= 44 && bb.height >= 44, `${name} ${sk}: Tippfläche zu klein oder abgeschnitten ${JSON.stringify(bb)}`);
     }
   }
-  for (const [act, wo] of [["stube", "stube"], ["freundebuch", "freundebuch"], ["lernpfad", "lernpfad"], ["ha", "hausaufgaben"]]) {
+  for (const [wort, typ, stufe] of [["anorak", "hoeren", 0], ["chaussettes", "buchstaben", 2], ["brun", "mischen", 1], ["z17", "zaehlen", 1], ["gants", "artikel", 1], ["echarpe", "fr-de", 0]]) {
+    await p.evaluate(([wort, typ, stufe]) => window.__PS.zeigeFr({ wort, typ, stufe, seed: 5 }), [wort, typ, stufe]);
+    await breit(`franz-${wort}-${typ}`);
+    for (const el of await p.$$(".option, .buchst, .hoer-knopf")) {
+      const bb = await el.boundingBox();
+      P.ok(bb && bb.x >= 0 && bb.x + bb.width <= w + 1 && bb.width >= 44 && bb.height >= 44, `${name} ${wort}/${typ}: Tippfläche zu klein oder abgeschnitten ${JSON.stringify(bb)}`);
+    }
+  }
+  for (const [act, wo] of [["stube", "stube"], ["freundebuch", "freundebuch"], ["lernpfad", "lernpfad"], ["ha", "hausaufgaben"], ["franz", "franz"]]) {
     await p.evaluate(() => { const u = window.__PS.ui(); u.ansicht = "start"; u.runde = null; });
     await p.click("#version"); await p.click("[data-act=dialog-zu]");
-    await p.click(`.kachel[data-act=${act}]`);
+    await p.click(act === "franz" ? "[data-act=franz]" : `.kachel[data-act=${act}]`);
     await breit(wo);
   }
+  for (const th of ["kleidung", "farben", "zahlen"]) { await p.click(`[data-act=fr-karten][data-arg=${th}]`); await breit("karten-" + th); await p.click("[data-act=franz]"); }
   P.ok(fehler.length === 0, `${name}: Fehler im Browser ${fehler.join(" | ")}`);
   await ctx.close();
 }

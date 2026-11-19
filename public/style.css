@@ -388,3 +388,74 @@ body.ruhig *, body.ruhig *::before, body.ruhig *::after { animation: none !impor
   .nachbar-zelle small { font-size: 12px; max-width: 70px; }
   .vgl-platz { width: 56px; height: 56px; font-size: 30px; }
 }
+
+/* ===== Französisch mit Camille ===== */
+.franz-karte { border-color: #d7e4fb; }
+.franz { display: flex; flex-direction: column; gap: 14px; }
+.training { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; border: 3px solid #d7e4fb; }
+.training h2 { margin: 0; }
+.fr-thema { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.fr-thema-kopf { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 240px; }
+.fr-thema-text { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.fr-thema-text b { font-size: 20px; }
+.fr-thema .knopfzeile { margin: 0; }
+.fr-prompt { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 10px 0 6px; text-align: center; }
+.fr-bild svg { width: 84px; height: 84px; display: block; }
+.fr-bild.gross svg { width: 150px; height: 150px; }
+.farbklecks { display: inline-block; width: 70px; height: 70px; border-radius: 50%; box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .12), 0 0 0 3px #fff, 0 0 0 5px var(--rand); }
+.farbklecks.gross { width: 130px; height: 130px; }
+.farbklecks.weiss { box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .06), 0 0 0 3px #cfc3d6; }
+.farbklecks.leer { background: #fbf8fd; border: 3px dashed #cdb6dc; box-shadow: none; display: inline-grid; place-items: center; font-size: 30px; font-weight: 800; color: #c9b8cf; }
+.ziffer { display: inline-grid; place-items: center; min-width: 70px; height: 70px; padding: 0 10px; border-radius: 18px; background: var(--akzent-hell); font-size: 40px; font-weight: 800; color: #9a3b6b; }
+.ziffer.gross { min-width: 130px; height: 130px; font-size: 76px; border-radius: 28px; }
+.hoer-knopf { width: 130px; height: 130px; border-radius: 50%; border: 0; background: var(--haupt); color: #fff; font-size: 56px; box-shadow: 0 6px 0 #5d3891; }
+.hoer-knopf:active { transform: translateY(4px); box-shadow: 0 2px 0 #5d3891; }
+.fr-wort { font-size: 34px; font-weight: 800; color: #2d4f9e; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.fr-wort.deutsch { color: var(--text); }
+.fr-wort .vgl-platz { width: auto; min-width: 90px; padding: 0 12px; }
+.mischen { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.mischen > b { font-size: 34px; color: var(--leise); }
+.misch-farbe { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.misch-farbe small { font-size: 17px; font-weight: 700; color: #2d4f9e; }
+.misch-liste .mischen .farbklecks { width: 46px; height: 46px; }
+.misch-liste { display: grid; gap: 4px; background: #fff; border-radius: var(--r); padding: 8px 12px; box-shadow: var(--schatten); }
+.punkte { gap: 6px; }
+.punkte div { display: flex; gap: 8px; font-size: 34px; line-height: 1; }
+.optionen.bilder { grid-template-columns: repeat(4, 1fr); }
+.option.bild-option { min-height: 120px; display: grid; place-items: center; padding: 8px; }
+.option.bild-option .fr-bild svg { width: 92px; height: 92px; }
+.option.bild-option .farbklecks { width: 80px; height: 80px; }
+.wort-bau { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+.vorne { font-size: 30px; font-weight: 800; color: var(--leise); }
+.slots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.slot { width: 46px; height: 58px; border-bottom: 4px solid #cdb6dc; display: grid; place-items: center; font-size: 34px; font-weight: 800; color: #2d4f9e; }
+.slot.jetzt { border-bottom-color: var(--haupt); background: var(--haupt-hell); border-radius: 8px 8px 0 0; }
+.slot.voll { border-bottom-color: var(--gut); animation: auf .25s ease; }
+.slot i { color: #cdbfd8; font-style: normal; }
+.buchst-reihe { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0 4px; }
+.buchst { width: 64px; height: 64px; border-radius: 16px; border: 2px solid var(--rand); background: #fff8e8; font-size: 32px; font-weight: 800; box-shadow: 0 3px 0 #ecd9b5; }
+.buchst:active { transform: translateY(2px); box-shadow: none; }
+.buchst.weg { visibility: hidden; }
+.buchst.wackel { animation: wackel .45s ease; border-color: var(--falsch); background: var(--falsch-hell); }
+.wortkarten { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.wortkarte { background: #fff; border: 3px solid var(--rand); border-radius: var(--r); padding: 12px 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; box-shadow: var(--schatten); }
+.wortkarte b { font-size: 21px; color: #2d4f9e; }
+.wortkarte small { color: var(--leise); font-size: 16px; }
+.wortkarte .fr-bild.gross svg { width: 96px; height: 96px; }
+.wortkarte .farbklecks.gross { width: 84px; height: 84px; }
+.wortkarte .ziffer.gross { min-width: 90px; height: 90px; font-size: 52px; }
+.wortkarte.spielt { border-color: var(--haupt); box-shadow: 0 0 0 5px var(--haupt-hell); transform: scale(1.03); }
+.winter-neu { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.winter-neu span { display: flex; flex-direction: column; align-items: center; background: #fff; border-radius: 16px; padding: 8px 12px; box-shadow: var(--schatten); }
+.winter-neu svg { width: 76px; height: 76px; }
+.winter-hinweis { display: flex; align-items: center; gap: 10px; background: #eef4ff; border-radius: 12px; padding: 6px 12px; }
+.winter-hinweis svg { width: 54px; height: 54px; flex: none; }
+.laden-ding.winter svg { width: 64px; height: 64px; }
+.laden-ding.winter span { color: #2d4f9e; }
+@media (max-width: 700px) {
+  .optionen.bilder { grid-template-columns: 1fr 1fr; }
+  .fr-bild.gross svg { width: 120px; height: 120px; }
+  .fr-wort { font-size: 28px; }
+  .buchst { width: 54px; height: 54px; font-size: 28px; }
+  .slot { width: 34px; height: 48px; font-size: 26px; }
+}
