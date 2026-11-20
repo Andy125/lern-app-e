@@ -149,6 +149,8 @@ function pruefeAufgabe(t, kontext) {
       if (t.skill === "schritte-3" || t.skill === "schritte-2" || (t.skill === "kurz" && t.stufe === 0)) ok(!kreuzungen.some(Boolean), `${k}: ${a} − ${b} soll ohne Übergang sein`);
       if (t.skill === "schritte-ue" || t.skill === "schritte-ue2") ok(kreuzungen.some(Boolean), `${k}: ${a} − ${b} soll einen Übergang haben`);
       if (t.layout === "schritte") {
+        // Schulformat (Stufe 2): ganzer Rechenweg, auch die Zahl vorne in jeder Zeile ist ein Feld
+        if (t.stufe === 2) ok(t.felder.length === 3 * teile.length - 1 && t.zeilen.slice(2).every((z) => z.teile[0] && z.teile[0].f != null), `${k}: Schulformat hat nicht alle Felder`);
         const schrittZeilen = zahlen.slice(1);
         ok(schrittZeilen.length === teile.length, `${k}: ${schrittZeilen.length} Schritte statt ${teile.length}`);
         schrittZeilen.forEach((w, i) => ok(w[2] === teile[i], `${k}: Schritt ${i + 1} nimmt ${w[2]} statt ${teile[i]} weg`));
@@ -223,15 +225,17 @@ for (const roh of [null, 5, "x", [], { fortschritt: 3 }, { puppe: "x", besitz: "
 // 6) Etappen, Freischalten, Besuch
 {
   const s = L.defaults();
-  ok(L.fokus(s) === "zahlen", "Start-Schwerpunkt");
+  ok(L.fokus(s) === "schritte" && s.schule === "schritte", "Start-Schwerpunkt ist der Schulstand");
+  ok(JSON.stringify(s.offen) === '["zahlen","weg","schritte"]', "Bis zum Schulstand offen: " + s.offen);
+  ok(L.THEMEN.map((t) => t.id).join(",") === "zahlen,weg,schritte,zehner,hunderter,uebergang,kurz", "Lernpfad in Buchreihenfolge");
   for (const art of ["warm", "neu", "mix", "kiste"]) {
     const sp = L.buildEtappe(s, { art, n: 5, seed: 9 });
     ok(art === "kiste" ? sp.length === 0 : sp.length === 5, `Etappe ${art} hat ${sp.length} Aufgaben`);
     for (const x of sp) ok(L.GEN[x.skill] && x.stufe >= 0 && x.stufe <= 2, `Etappe ${art}: ${JSON.stringify(x)}`);
   }
-  // Zahlen sicher üben, dann öffnet sich das nächste Thema
-  for (const id of L.themaById("zahlen").skills) for (let i = 0; i < 3; i++) L.record(s, id, true, "2026-11-13");
-  for (const id of L.themaById("weg").skills) for (let i = 0; i < 3; i++) L.record(s, id, true, "2026-11-13");
+  // In Schritten sicher üben, dann öffnet sich das nächste Thema
+  ok(L.aktualisiereOffen(s).length === 0, "Ohne Üben öffnet sich nichts");
+  for (const id of L.themaById("schritte").skills) for (let i = 0; i < 3; i++) L.record(s, id, true, "2026-11-13");
   const neu = L.aktualisiereOffen(s);
   ok(neu.includes("zehner") && !neu.includes("hunderter"), `Freischalten: ${neu}`);
   ok(L.fokus(s) === "zehner", `Schwerpunkt nach dem Freischalten: ${L.fokus(s)}`);
@@ -246,6 +250,24 @@ for (const roh of [null, 5, "x", [], { fortschritt: 3 }, { puppe: "x", besitz: "
   const r = L.R(1); let st = 0, sti = 0; const u = L.defaults();
   for (let i = 0; i < 400; i++) { const g = L.ueberraschung(u, r); if (g.typ === "sticker") sti++; else st += g.n; }
   ok(sti > 60 && sti < 200 && u.muenzen === st, `Überraschungen: ${sti} Sticker, ${st} Edelsteine`);
+}
+
+// 7) Schulstand, Profi-Aufgaben, Medaillen, Belohnungen
+{
+  const alt = L.migrate({ name: "Alt", offen: ["zahlen", "weg"], fortschritt: { stellen: { box: 4 } } });
+  ok(alt.schule === "schritte" && alt.offen.includes("schritte") && L.fokus(alt) === "schritte", "Alter Stand bekommt den Schulstand");
+  const weiter = L.migrate({ schule: "uebergang" });
+  ok(JSON.stringify(weiter.offen) === '["zahlen","weg","schritte","zehner","hunderter","uebergang"]' && L.fokus(weiter) === "uebergang", "Schulstand weiter hinten öffnet alles davor: " + weiter.offen);
+  ok(L.istProfi(L.makeTask("schritte-3", 1, 5)) && L.istProfi(L.makeTask("schritte-ue", 2, 5)) && !L.istProfi(L.makeTask("schritte-3", 0, 5)) && !L.istProfi(L.makeTask("vergleich", 2, 5)), "Profi-Aufgaben richtig erkannt");
+  const m = L.defaults();
+  for (const id of L.themaById("zahlen").skills) for (let i = 0; i < 3; i++) L.record(m, id, true, "2026-11-20");
+  ok(L.neueMedaillen(m, "2026-11-20").length === 0, "Medaille erst bei 100 %");
+  for (const id of L.themaById("zahlen").skills) L.record(m, id, true, "2026-11-20");
+  const med = L.neueMedaillen(m, "2026-11-20");
+  ok(JSON.stringify(med) === '["zahlen"]' && m.medaillen.zahlen === "2026-11-20", "Medaille bei 100 %: " + med);
+  ok(L.neueMedaillen(m, "2026-11-21").length === 0, "Medaille nur einmal");
+  ok(L.migrate(JSON.parse(JSON.stringify(m))).medaillen.zahlen === "2026-11-20", "Medaille übersteht Speichern und Laden");
+  ok(L.LOHN.richtig === 1 && L.LOHN.spaeter === 0 && L.LOHN.profi === 1 && L.HA_LOHN(3) === 0 && L.HA_LOHN(15) === 8, "Belohnungen langsamer");
 }
 
 console.log(`${geprueft} Prüfungen, ${fehler} Fehler`);

@@ -15,7 +15,7 @@ Oben rechts steht die Versionsnummer. So sieht man nach einem Update, ob die neu
 ## Gebaut für ein Kind mit ADS
 
 - **Leichter Start:** Die erste Aufgabe jeder Mission ist die sicherste. Ein neuer Rechentrick beginnt immer mit einer kurzen Erklärung in Bildern.
-- **Oft kleine Erfolge:** Jedes richtige Feld klingt, jede Aufgabe bringt Edelsteine, fünf geschaffte Aufgaben ergeben eine Glitzerkette mit Bonus. Nach jeder Etappe gibt es ein Geschenk zum Antippen (Edelsteine oder ein Sticker fürs Album).
+- **Oft kleine Erfolge, aber verdient:** Jedes richtige Feld klingt. Eine Aufgabe auf Anhieb bringt 1 Edelstein, eine Profi-Aufgabe beim Minusrechnen (selbst zerlegt, in Schritten oder mit Übergang) 1 extra. Fünf geschaffte Aufgaben ergeben eine Glitzerkette mit Bonus. Nach jeder Etappe gibt es ein Geschenk zum Antippen (Edelsteine oder ein Sticker fürs Album). Sitzt ein Thema zu 100 %, gibt es eine Medaille.
 - **Kein Druck:** Keine Zeitmessung bei den Aufgaben, keine Strafen, Sterne gehen nie verloren. Fehler wandern in den Übe-Korb und kommen später wieder. Die Puppenfreunde sind nie traurig, wenn ein Tag ausfällt.
 - **Feld für Feld:** Jedes Zwischenergebnis wird sofort geprüft. Beim ersten Fehler kommt ein Tipp mit Rechenstrich, beim zweiten die Lösung.
 - **Hausaufgaben-Zeit:** Drei Startklar-Haken, dann macht die Puppe mit (5, 10 oder 15 Minuten) und ermutigt zwischendurch. Am Ende gibt es Edelsteine.
@@ -26,13 +26,15 @@ Oben rechts steht die Versionsnummer. So sieht man nach einem Update, ob die neu
 | --- | --- | --- |
 | Zahlen bis 1000 | Stellenwerte, Nachbarzehner, Zahlenstrahl | Hunderter, Zehner, Einer · Nachbarzehner und Nachbarhunderter · Größer, kleiner, gleich · Zahlenstrahl |
 | Hunderter, Zehner, Einer weg | S. 28 und 29 | Hunderter weg · Zehner weg · Einer weg · Bis zum Zehner und Hunderter |
+| In Schritten rechnen | S. 32 und 33, Arbeitsblatt «Subtraktion ohne Übertrag» | Drei Schritte · Zwei Schritte |
 | Über den Zehner | S. 36 und 37 | Nachbaraufgaben · Einer weg über den Zehner · Ähnliche Aufgaben · Einer weg über den Hunderter |
 | Über den Hunderter | S. 36 und 37 | Zehner weg über den Hunderter · Ähnliche Aufgaben mit Zehnern · Zahlenraupe rückwärts |
-| In Schritten rechnen | S. 32 und 33 | Drei Schritte · Zwei Schritte |
 | Schritte mit Übergang | S. 39 | Zwei Schritte mit Übergang · Drei Schritte mit Übergang |
 | Kurz geschrieben | S. 41 | Kurze Schreibweise |
 
-Jeder Lernteil hat drei Stufen: geführt (Zwischenschritte vorgegeben), selbst zerlegen, frei (manchmal als Rechengeschichte). Ein Thema öffnet sich, wenn das vorige zu 60 % sitzt. In der Eltern-Übersicht lassen sich Themen freischalten und ein Schwerpunkt setzen.
+Jeder Lernteil hat drei Stufen: geführt (Zwischenschritte vorgegeben), selbst zerlegen, frei. Beim Rechnen in Schritten ist die dritte Stufe das Schulformat wie im Heft: der ganze Rechenweg, auch die Zahl vorne in jeder Zeile (manchmal als Rechengeschichte).
+
+Die Reihenfolge folgt dem Buch. Der **Schulstand** (in der Eltern-Übersicht einstellbar, zurzeit «In Schritten rechnen») bestimmt, was offen ist: Alles bis dahin ist offen und wird zum Aufwärmen wiederholt, die Tagesmission übt vor allem das erste Thema ab dem Schulstand, das noch nicht sitzt. Die Themen danach öffnen sich, wenn das vorige zu 60 % sitzt. In der Eltern-Übersicht lassen sich Themen auch freischalten und ein fester Schwerpunkt setzen.
 
 ## Französisch mit Camille
 

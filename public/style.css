@@ -459,3 +459,10 @@ body.ruhig *, body.ruhig *::before, body.ruhig *::after { animation: none !impor
   .buchst { width: 54px; height: 54px; font-size: 28px; }
   .slot { width: 34px; height: 48px; font-size: 26px; }
 }
+
+/* ===== Profi-Aufgaben, Medaillen, Schulstand ===== */
+.profi-abzeichen { display: inline-block; background: #fff4d4; color: #8a5a00; border: 2px solid #f1d98c; border-radius: 999px; padding: 3px 12px; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.profi-zeile { color: #8a5a00; font-weight: 700; }
+.medaille-zeile { background: #fff4d4; border-radius: 12px; padding: 8px 12px; font-weight: 700; font-size: 20px; }
+.station.medaille .station-nr { background: #fff1c2; box-shadow: 0 0 0 3px #f2c94c; }
+.schule-marke { color: var(--haupt); font-weight: 700; }

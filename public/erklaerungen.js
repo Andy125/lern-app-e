@@ -75,6 +75,7 @@
       { text: "Erst die Hunderter weg: 438 − 100 = 338.", bild: { typ: "sprung", start: 438, spruenge: [100], labels: "alle" } },
       { text: "Dann die Zehner weg: 338 − 20 = 318.", bild: { typ: "sprung", start: 438, spruenge: [100, 20], labels: "alle" } },
       { text: "Danach die Einer weg: 318 − 6 = 312. Fertig!", bild: { typ: "sprung", start: 438, spruenge: [100, 20, 6], labels: "alle" } },
+      { text: "So schreibst du es ins Heft. Vorne in jeder Zeile steht das Ergebnis der Zeile darüber.", bild: { typ: "rechnung", zeilen: ["438 − 126 = 312", "438 − 100 = 338", "338 − 20 = 318", "318 − 6 = 312"] } },
     ],
     "schritte-2": [
       { text: "934 − 23 hat keine Hunderter. Dann brauchst du nur zwei Schritte.", bild: { typ: "rechnung", zeilen: ["934 − 20 = 914", "914 − 3 = 911"] } },

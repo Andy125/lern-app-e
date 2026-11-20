@@ -294,7 +294,7 @@
     R.werte = felder.map(() => ""); R.fstat = felder.map(() => "offen"); R.fversuche = felder.map(() => 0);
     R.aktiv = 0; R.fehler = 0; R.tippOffen = false; R.meldung = null; R.hilfeBild = null; R.fertig = false; R.wackel = -1;
     R.wahl = null; R.falsch = []; R.versuche = 0;
-    R.gelegt = []; R.benutzt = []; R.falschKachel = -1; R.zeigeWort = false; R.neuWinter = null;
+    R.gelegt = []; R.benutzt = []; R.falschKachel = -1; R.zeigeWort = false; R.neuWinter = null; R.medaille = null; R.profiLohn = false;
     // Neuer Lernteil? Erst kurz erklären.
     if (s.fach !== "fr" && !S.gesehen[s.skill] && ERK[s.skill]) { ui.ansicht = "erklaerung"; ui.erk = { skill: s.skill, seite: 0, ausRunde: true }; render(); return; }
     ui.ansicht = "runde"; letzteAktion = Date.now();
@@ -350,7 +350,9 @@
       const rr = FR.record(S, t.wort, erster, heute());
       if (rr.neuWinter) { R.neuWinter = rr.neuWinter; R.winterNeu = (R.winterNeu || []).concat(rr.neuWinter); }
     } else L.record(S, t.skill, erster, heute());
-    const m = R.fehler === 0 ? L.LOHN.richtig : L.LOHN.spaeter;
+    const profi = R.fehler === 0 && L.istProfi(t);
+    const m = (R.fehler === 0 ? L.LOHN.richtig : L.LOHN.spaeter) + (profi ? L.LOHN.profi : 0);
+    R.profiLohn = profi;
     S.muenzen += m; S.punkte += R.fehler === 0 ? L.LOHN.punkteRichtig : L.LOHN.punkteSpaeter;
     const T = tag(); T.aufgaben++; if (R.fehler === 0) T.richtig++;
     if (erster) R.ersteRichtig++;
@@ -361,8 +363,12 @@
     if (geholfen) R.lob = "Das üben wir gleich noch einmal.";
     R.gelernt = geholfen || R.fehler > 0;
     if (geholfen && R.nochmal < 2) { R.nochmal++; R.specs.push(t.fach === "fr" ? { fach: "fr", wort: t.wort, typ: t.typ, stufe: t.stufe, seed: zufall() } : { skill: t.skill, stufe: t.stufe, seed: zufall(), freund: R.freund }); }
-    if (t.fach !== "fr") { const neu = L.aktualisiereOffen(S); if (neu.length) R.neuFrei = (R.neuFrei || []).concat(neu); }
-    speichern(); render(); plusAnzeigen("+" + m);
+    if (t.fach !== "fr") {
+      const neu = L.aktualisiereOffen(S); if (neu.length) R.neuFrei = (R.neuFrei || []).concat(neu);
+      const med = L.neueMedaillen(S, heute()); if (med.length) { S.muenzen += L.LOHN.medaille * med.length; R.medaille = med; }
+    }
+    speichern(); render(); if (m > 0) plusAnzeigen("+" + m);
+    if (R.medaille) { konfetti(); ton(12, "glitzer"); }
     if (t.fach === "fr") sprichFr(t.sprichNachher || t.sprich);
     if (kette) { ton(12, "glitzer"); konfetti(); toast(`Glitzerkette fertig! +${L.LOHN.kette} 💎`); }
     else if (!geholfen) ton(8, R.fehler === 0 ? "glitzer" : null);
@@ -502,14 +508,16 @@
       const erkl = (R.gelernt || t.fach === "fr") && t.erklaerung ? `<p>${t.fach === "fr" ? `<button class="vorlesen klein" data-act="fr-sag-loesung" aria-label="Auf Französisch anhören">🔊</button> ` : ""}${esc(t.erklaerung)}</p>` : "";
       const merk = R.gelernt && t.merk ? `<p class="merk">🧠 ${esc(t.merk)}</p>` : "";
       const neuW = R.neuWinter ? `<p class="winter-hinweis">${P.kleidBild(R.neuWinter)}<span>❄️ Neu für ${esc(puppeName())}: <b>${esc(FR.zeige(FR.wortById(R.neuWinter)))}</b>! In der Puppenstube kann sie es anziehen.</span></p>` : "";
-      unten = `<div class="rueck ${R.gelernt ? "loesung" : "gut"}" role="status"><b>${esc(R.lob)}</b>${erkl}${merk}${neuW}<button class="btn haupt gross" data-act="weiter">Weiter ➜</button></div>`;
+      const profiZeile = R.profiLohn ? `<p class="profi-zeile">⭐ Profi-Aufgabe geschafft: 1 Edelstein extra!</p>` : "";
+      const medZeile = R.medaille ? R.medaille.map((id) => { const th = L.themaById(id); return `<p class="medaille-zeile">🏅 Medaille für «${esc(th.name)}»! Das sitzt jetzt richtig gut. +${L.LOHN.medaille} 💎</p>`; }).join("") : "";
+      unten = `<div class="rueck ${R.gelernt ? "loesung" : "gut"}" role="status"><b>${esc(R.lob)}</b>${profiZeile}${medZeile}${erkl}${merk}${neuW}<button class="btn haupt gross" data-act="weiter">Weiter ➜</button></div>`;
     } else if (R.meldung) {
       unten = `<div class="rueck ${R.meldung.art === "tipp" ? "tipp" : "loesung"}" role="status"><b>${esc(R.meldung.text)}</b>${R.meldung.tipp ? `<p>💡 ${esc(R.meldung.tipp)}</p>` : ""}${R.hilfeBild ? bildHtml(R.hilfeBild) : ""}</div>`;
     } else if (t.tipp || t.hilfe) {
       unten = R.tippOffen ? `<div class="rueck tipp"><p>💡 ${esc(t.tipp)}</p>${bildHtml(t.hilfe)}</div>` : `<button class="tipp-knopf" data-act="tipp-zeigen">💡 Ich brauche einen Tipp</button>`;
     }
     const istWahl = t.art !== "felder";
-    const inhalt = `<div class="frage-zeile"><h2 class="frage">${esc(t.frage)}</h2><button class="vorlesen" data-act="vorlesen" aria-label="Vorlesen">🔊</button></div>
+    const inhalt = `${L.istProfi(t) && !R.fertig ? `<span class="profi-abzeichen">⭐ Profi-Aufgabe: auf Anhieb richtig gibt 1 Edelstein extra</span>` : ""}<div class="frage-zeile"><h2 class="frage">${esc(t.frage)}</h2><button class="vorlesen" data-act="vorlesen" aria-label="Vorlesen">🔊</button></div>
       ${t.text ? `<p class="aufgaben-text">${esc(t.text)}</p>` : ""}
       ${t.fig ? bildHtml(t.fig) : ""}
       ${t.art === "buchstaben" ? buchstabenHtml(t) : t.fach === "fr" ? frWahlHtml(t) : istWahl ? wahlHtml(t) : zeilenHtml(t)}
@@ -651,7 +659,7 @@
   function winterLaden() {
     return `<div class="laden">${FR.imThema("kleidung").map((w) => {
       const hat = S.fr.winter.includes(w.id), an = S.fr.traegt.includes(w.id);
-      return `<button class="laden-ding winter${hat ? " hat" : " teuer"}${an ? " an" : ""}" data-act="winter" data-arg="${w.id}">${P.kleidBild(w.id)}<span>${esc(FR.zeige(w))}</span><small>${hat ? (an ? "trägt sie" : "anziehen") : "🔒 bei Camille lernen"}</small></button>`;
+      return `<button class="laden-ding winter${hat ? " hat" : " teuer"}${an ? " an" : ""}" data-act="winter" data-arg="${w.id}">${P.kleidBild(w.id)}<span>${esc(FR.zeige(w))}</span><small>${hat ? (an ? "trägt sie · ausziehen" : "anziehen") : "🔒 bei Camille lernen"}</small></button>`;
     }).join("")}</div><p class="leise klein mitte-text">Tippe auf ein Kleidungsstück. Camille sagt dir, wie es auf Französisch heißt.</p>`;
   }
 
@@ -684,9 +692,10 @@
         const offen = S.offen.includes(th.id);
         const b = L.bereitschaft(S, th.id);
         const sterne = th.skills.reduce((a, id) => a + L.teilStand(S, id).sterne, 0);
-        return `<button class="station${offen ? "" : " zu"}${th.id === fok ? " hier" : ""}" data-act="${offen ? "thema" : "zu"}" data-arg="${th.id}">
+        const med = S.medaillen[th.id];
+        return `<button class="station${offen ? "" : " zu"}${th.id === fok ? " hier" : ""}${med ? " medaille" : ""}" data-act="${offen ? "thema" : "zu"}" data-arg="${th.id}">
           <span class="station-nr">${offen ? esc(th.icon) : "🔒"}</span>
-          <span class="station-text"><b>${esc(th.name)}</b>${offen ? `<span class="balken"><i style="width:${b}%"></i></span><small>★ ${sterne} von ${th.skills.length * 3}${th.id === fok ? " · Hier bist du!" : ""}</small>` : `<small>Wird frei, wenn das Thema davor gut sitzt.</small>`}</span>
+          <span class="station-text"><b>${esc(th.name)}${med ? " 🏅" : ""}</b>${th.id === S.schule ? `<small class="schule-marke">🏫 Gerade in der Schule</small>` : ""}${offen ? `<span class="balken"><i style="width:${b}%"></i></span><small>★ ${sterne} von ${th.skills.length * 3}${th.id === fok ? " · Hier bist du!" : ""}${med ? " · Medaille geholt!" : b < 100 ? " · Bei 100 % gibt es eine Medaille" : ""}</small>` : `<small>Wird frei, wenn das Thema davor gut sitzt.</small>`}</span>
         </button>${i < L.THEMEN.length - 1 ? `<div class="pfad-weg" aria-hidden="true"></div>` : ""}`;
       }).join("")}</main>`;
   }
@@ -749,7 +758,7 @@
         const kleid = reiter === "kleider", schmuck = reiter === "schmuck";
         const hat = S.besitz.includes(d.id) || (kleid && d.preis === 0);
         const an = (kleid && S.puppe.kleid === d.id) || (schmuck && S.traegt.includes(d.id));
-        const unter = reiter === "leckeres" ? `${d.preis} 💎` : hat ? (kleid ? (an ? "trägt sie" : "anziehen") : schmuck ? (an ? "trägt sie" : "ablegen") : "im Zimmer") : `${d.preis} 💎`;
+        const unter = reiter === "leckeres" ? `${d.preis} 💎` : hat ? (kleid ? (an ? (d.id === "kleid" ? "trägt sie" : "trägt sie · ausziehen") : "anziehen") : schmuck ? (an ? "trägt sie · ablegen" : "anlegen") : "im Zimmer") : `${d.preis} 💎`;
         return `<button class="laden-ding${hat ? " hat" : ""}${an ? " an" : ""}${!hat && S.muenzen < d.preis ? " teuer" : ""}" data-act="kaufen" data-arg="${d.id}" ${reiter === "moebel" && hat ? "disabled" : ""}><span class="icon">${d.icon}</span><span>${esc(d.name)}</span><small>${unter}</small></button>`;
       }).join("")}</div>`;
     }
@@ -794,7 +803,7 @@
       <div class="gross-puppe huepf">${puppe("jubel")}</div>
       <h1>Geschafft! 🎉</h1>
       <p>${h.minuten >= 1 ? `Du hast ${h.minuten} ${h.minuten === 1 ? "Minute" : "Minuten"} an deinen Hausaufgaben gearbeitet.` : "Schon fertig? Prima!"}</p>
-      ${h.lohn ? `<p class="schatz">+${h.lohn} Edelsteine für ${esc(puppeName())}</p>` : `<p class="leise">Ab 3 Minuten gibt es Edelsteine.</p>`}
+      ${h.lohn ? `<p class="schatz">+${h.lohn} Edelsteine für ${esc(puppeName())}</p>` : `<p class="leise">Ab 5 Minuten gibt es Edelsteine.</p>`}
       ${h.sticker ? `<p>Und ein Sticker für dein Album: <span class="sticker-klein">${h.sticker}</span></p>` : ""}
       <button class="btn haupt gross" data-act="ha-noch">Noch eine Runde</button>
       <button class="btn" data-act="heim">Zur Startseite</button></main>`;
@@ -848,13 +857,15 @@
         ${FR.THEMEN.map((th) => { const b = FR.bereitschaft(S, th.id); return `<div class="ergebnis"><span>${esc(th.icon)} ${esc(th.de)}</span><span class="balken"><i style="width:${b}%"></i></span><b>${b} %</b></div>`; }).join("")}
         <p class="leise klein">100 % heißt: jedes Wort wurde erkannt, gewusst und richtig mit Buchstaben gelegt. Noch unsicher: ${esc(FR.WOERTER.filter((w) => FR.stand(S, w.id).n > 0 && FR.stand(S, w.id).box <= 1).map(FR.zeige).join(", ") || "nichts")}.</p>`;
     } else if (reiter === "pfad") {
+      const bis = L.THEMEN.findIndex((t) => t.id === S.schule);
       inhalt = `<h2>Lernpfad</h2>
-        <p class="leise klein">Die Themen öffnen sich nacheinander, sobald das vorige zu 60 % sitzt. Wenn die Schule schon weiter ist, können Sie Themen hier freischalten und den Schwerpunkt setzen. Die Tagesmission übt dann vor allem dieses Thema.</p>
+        <label>In der Schule ist die Klasse gerade bei: <select class="eingabe klein" data-change="schule">${L.THEMEN.map((t) => `<option value="${t.id}" ${t.id === S.schule ? "selected" : ""}>${esc(t.icon + " " + t.name)}</option>`).join("")}</select></label>
+        <p class="leise klein">Alles bis zum Schulstand ist offen und wird zum Aufwärmen wiederholt. Die Tagesmission übt vor allem das erste Thema ab dem Schulstand, das noch nicht sitzt. Die Themen danach öffnen sich, sobald das vorige zu 60 % sitzt. Sie können sie auch hier freischalten oder einen festen Schwerpunkt setzen.</p>
         <table class="plan"><tbody>
-        <tr><td colspan="3"><label class="schalter"><input type="radio" name="fokus" value="" data-change="fokus" ${S.fokus ? "" : "checked"}> Schwerpunkt automatisch wählen</label></td></tr>
+        <tr><td colspan="3"><label class="schalter"><input type="radio" name="fokus" value="" data-change="fokus" ${S.fokus ? "" : "checked"}> Schwerpunkt automatisch wählen (ab dem Schulstand)</label></td></tr>
         ${L.THEMEN.map((th, i) => `<tr><td><label class="schalter"><input type="radio" name="fokus" value="${th.id}" data-change="fokus" ${S.fokus === th.id ? "checked" : ""} ${S.offen.includes(th.id) ? "" : "disabled"}> ${esc(th.icon)} ${esc(th.name)}</label><small class="leise">${esc(th.buch)}</small></td>
           <td>${L.bereitschaft(S, th.id)} %</td>
-          <td>${i === 0 ? "offen" : `<label class="schalter"><input type="checkbox" data-change="offen" value="${th.id}" ${S.offen.includes(th.id) ? "checked" : ""}> offen</label>`}</td></tr>`).join("")}
+          <td>${i <= bis ? "offen" : `<label class="schalter"><input type="checkbox" data-change="offen" value="${th.id}" ${S.offen.includes(th.id) ? "checked" : ""}> offen</label>`}</td></tr>`).join("")}
         </tbody></table>`;
     } else if (reiter === "einst") {
       const e = S.einst;
@@ -1068,7 +1079,11 @@
       case "s-farbe": S.puppe.farbe = arg; speichern(); render(); return;
       case "kaufen": {
         const d = L.shopDing(arg); if (!d) return;
-        if (L.SHOP.kleider.includes(d) && (S.besitz.includes(d.id) || d.preis === 0)) { S.puppe.kleid = d.id; speichern(); puppeReagiert("jubel", "Das ziehe ich gern an!", 1600); return; }
+        if (L.SHOP.kleider.includes(d) && (S.besitz.includes(d.id) || d.preis === 0)) {
+          if (S.puppe.kleid === d.id && d.id !== "kleid") { S.puppe.kleid = "kleid"; speichern(); puppeReagiert("jubel", "Ausgezogen! Jetzt trage ich wieder mein Kleid.", 1800); return; }
+          if (S.puppe.kleid === d.id) { puppeReagiert(null, "Das ist mein Lieblingskleid!", 1600); return; }
+          S.puppe.kleid = d.id; speichern(); puppeReagiert("jubel", "Das ziehe ich gern an!", 1600); return;
+        }
         if (L.SHOP.schmuck.includes(d) && S.besitz.includes(d.id)) {
           const i = S.traegt.indexOf(d.id); if (i >= 0) S.traegt.splice(i, 1); else S.traegt.push(d.id);
           speichern(); render(); return;
@@ -1148,9 +1163,10 @@
       if (t.id === "e-vorlesen") e2.vorlesen = t.checked;
     }
     if (art === "fokus") S.fokus = t.value || null;
+    if (art === "schule") { S.schule = t.value; if (S.fokus && L.THEMEN.findIndex((x) => x.id === S.fokus) < L.THEMEN.findIndex((x) => x.id === S.schule)) S.fokus = null; }
     if (art === "offen") {
       if (t.checked && !S.offen.includes(t.value)) S.offen.push(t.value);
-      if (!t.checked) { S.offen = S.offen.filter((x) => x !== t.value || x === "zahlen"); if (S.fokus === t.value) S.fokus = null; }
+      if (!t.checked) { S.offen = S.offen.filter((x) => x !== t.value); if (S.fokus === t.value) S.fokus = null; }
     }
     S = L.migrate(S); speichern(); render();
   });
