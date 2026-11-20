@@ -74,6 +74,37 @@
   };
   const SCHMUCK_REIHE = ["kette", "tasche", "brille", "haarreif", "blumenkranz", "schleife", "sonnenhut", "krone"];
 
+  // ---------- Winterkleider (Französisch: les vêtements d'hiver) ----------
+  const WF = { bonnet: "#e0283b", echarpe: "#f6c445", gants: "#2f6fd6", bottes: "#8a5a2b", chaussettes: "#f58fb7", pull: "#3fa34d", pantalon: "#34508f", manteau: "#b98a5e", anorak: "#2f8fd6" };
+  const W_BEIN = {
+    chaussettes: () => [88, 112].map((x) => `<rect x="${x - 7}" y="220" width="15" height="18" rx="5" fill="${WF.chaussettes}"/><path d="M${x - 7} 226 h15 M${x - 7} 232 h15" stroke="#fff" stroke-width="2.5"/>`).join(""),
+    pantalon: () => `<path d="M76 186 L124 186 L122 234 L104 234 L100 202 L96 234 L78 234 Z" fill="${WF.pantalon}"/><path d="M78 230 h18 M104 230 h18" stroke="#26407a" stroke-width="3"/>`,
+    bottes: () => [88, 112].map((x) => `<path d="M${x - 9} 210 L${x + 9} 210 L${x + 9} 236 Q${x + 18} 238 ${x + 16} 248 L${x - 11} 248 Q${x - 12} 240 ${x - 9} 236 Z" fill="${WF.bottes}"/><ellipse cx="${x}" cy="211" rx="11" ry="5" fill="#fdf6ea"/><rect x="${x - 11}" y="244" width="28" height="4" rx="2" fill="#5e3a1a"/>`).join(""),
+  };
+  const W_KOERPER = {
+    pull: () => `<path d="M68 134 Q100 126 132 134 L136 196 L64 196 Z" fill="${WF.pull}"/><path d="M66 190 L134 190" stroke="#2d7c39" stroke-width="5"/><path d="M88 132 Q100 140 112 132" stroke="#2d7c39" stroke-width="5" fill="none"/>` + [146, 160, 174].map((y) => `<path d="M76 ${y} q6 -5 12 0 q6 5 12 0 q6 -5 12 0 q6 5 12 0" stroke="#2d7c39" stroke-width="1.6" fill="none" opacity=".6"/>`).join(""),
+    manteau: () => `<path d="M66 134 Q100 124 134 134 L146 228 Q100 236 54 228 Z" fill="${WF.manteau}"/><path d="M86 132 L100 160 L114 132" fill="#9b6f45"/><line x1="100" y1="160" x2="100" y2="232" stroke="#9b6f45" stroke-width="2.5"/><rect x="60" y="182" width="80" height="7" fill="#7d5533"/>` + [168, 200, 216].map((y) => `<circle cx="106" cy="${y}" r="3.2" fill="#5e3a1a"/>`).join("") + `<rect x="68" y="196" width="18" height="12" rx="3" fill="#a77a4f"/><rect x="114" y="196" width="18" height="12" rx="3" fill="#a77a4f"/>`,
+    anorak: () => `<path d="M64 134 Q100 122 136 134 L142 202 Q100 210 58 202 Z" fill="${WF.anorak}"/>` + [150, 166, 182].map((y) => `<path d="M62 ${y} Q100 ${y + 6} 138 ${y}" stroke="#1f6fb0" stroke-width="2.5" fill="none"/>`).join("") + `<line x1="100" y1="132" x2="100" y2="206" stroke="#e8eef6" stroke-width="3"/><path d="M80 130 Q100 142 120 130 L118 124 Q100 134 82 124 Z" fill="#1f6fb0"/>`,
+  };
+  const W_KOPF = {
+    echarpe: () => `<path d="M64 126 Q100 146 136 126 L138 140 Q100 160 62 140 Z" fill="${WF.echarpe}"/><path d="M72 134 Q100 150 128 134" stroke="#e0283b" stroke-width="4" fill="none"/><path d="M112 140 L126 190 L110 194 L100 146 Z" fill="${WF.echarpe}"/><path d="M114 156 L122 154 M117 170 L125 168" stroke="#e0283b" stroke-width="4"/><path d="M112 194 v8 M116 193 v8 M120 192 v8 M124 191 v8" stroke="${WF.echarpe}" stroke-width="2.5"/>`,
+    bonnet: () => `<path d="M48 76 Q46 18 100 16 Q154 18 152 76 Z" fill="${WF.bonnet}"/><path d="M60 40 Q100 30 140 40 M54 56 Q100 46 146 56" stroke="#fff" stroke-width="5" fill="none" opacity=".85"/><path d="M44 66 Q100 54 156 66 L156 82 Q100 70 44 82 Z" fill="#fdf6ea"/><circle cx="100" cy="14" r="14" fill="#fdf6ea"/>`,
+  };
+  const handschuh = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="9.5" ry="10.5" fill="${WF.gants}"/><ellipse cx="${x + (x < 100 ? 8 : -8)}" cy="${y - 4}" rx="4" ry="5.5" fill="${WF.gants}"/><path d="M${x - 9} ${y - 7} h18" stroke="#fff" stroke-width="2.5"/>`;
+  // Bilder der Kleidungsstücke für die Aufgaben (eigene Zeichnungen)
+  const KLEID_BILD = {
+    bonnet: `<path d="M20 70 Q18 18 50 16 Q82 18 80 70 Z" fill="${WF.bonnet}"/><path d="M26 38 Q50 30 74 38 M22 54 Q50 46 78 54" stroke="#fff" stroke-width="4" fill="none"/><rect x="14" y="62" width="72" height="18" rx="8" fill="#fdf6ea"/><circle cx="50" cy="14" r="11" fill="#fdf6ea"/>`,
+    echarpe: `<path d="M18 22 Q50 34 82 22 L84 36 Q50 50 16 36 Z" fill="${WF.echarpe}"/><path d="M58 40 L70 84 L54 88 L44 44 Z" fill="${WF.echarpe}"/><path d="M24 30 Q50 40 76 30 M60 58 L68 56 M63 72 L71 70" stroke="#e0283b" stroke-width="4" fill="none"/><path d="M56 88 v8 M60 87 v8 M64 86 v8 M68 85 v8" stroke="${WF.echarpe}" stroke-width="2.5"/>`,
+    gants: [26, 68].map((x, i) => `<g transform="translate(${x} 52) ${i ? "scale(-1 1)" : ""}"><rect x="-13" y="-8" width="26" height="30" rx="10" fill="${WF.gants}"/>${[-10, -4, 2, 8].map((dx) => `<rect x="${dx - 2.5}" y="-28" width="7" height="26" rx="3.5" fill="${WF.gants}"/>`).join("")}<rect x="12" y="-6" width="7" height="18" rx="3.5" transform="rotate(30 12 -6)" fill="${WF.gants}"/><rect x="-14" y="16" width="28" height="9" rx="3" fill="#fff"/></g>`).join(""),
+    bottes: [30, 64].map((x) => `<path d="M${x - 12} 20 L${x + 10} 20 L${x + 10} 62 Q${x + 26} 64 ${x + 24} 82 L${x - 14} 82 Q${x - 15} 70 ${x - 12} 62 Z" fill="${WF.bottes}"/><ellipse cx="${x - 1}" cy="20" rx="14" ry="7" fill="#fdf6ea"/><rect x="${x - 14}" y="78" width="38" height="6" rx="3" fill="#5e3a1a"/>`).join(""),
+    chaussettes: [30, 66].map((x) => `<path d="M${x - 10} 14 L${x + 10} 14 L${x + 10} 58 Q${x + 26} 60 ${x + 24} 76 Q${x + 20} 86 ${x} 84 L${x - 10} 82 Z" fill="${WF.chaussettes}"/><path d="M${x - 10} 22 h20 M${x - 10} 30 h20 M${x - 10} 38 h20" stroke="#fff" stroke-width="3.5"/>`).join(""),
+    pull: `<path d="M30 22 Q50 14 70 22 L92 34 L84 62 L74 56 L74 88 L26 88 L26 56 L16 62 L8 34 Z" fill="${WF.pull}"/><path d="M40 20 Q50 30 60 20" stroke="#2d7c39" stroke-width="4" fill="none"/><path d="M26 82 h48" stroke="#2d7c39" stroke-width="4"/>` + [44, 58, 72].map((y) => `<path d="M30 ${y} q5 -4 10 0 q5 4 10 0 q5 -4 10 0 q5 4 10 0" stroke="#2d7c39" stroke-width="1.6" fill="none" opacity=".6"/>`).join(""),
+    pantalon: `<path d="M28 10 L72 10 L80 92 L58 92 L50 34 L42 92 L20 92 Z" fill="${WF.pantalon}"/><rect x="28" y="10" width="44" height="8" fill="#26407a"/><path d="M22 86 h18 M60 86 h18" stroke="#26407a" stroke-width="3"/>`,
+    manteau: `<path d="M30 10 Q50 4 70 10 L84 94 Q50 100 16 94 Z" fill="${WF.manteau}"/><path d="M38 9 L50 34 L62 9" fill="#9b6f45"/><line x1="50" y1="34" x2="50" y2="96" stroke="#9b6f45" stroke-width="2.5"/><rect x="22" y="52" width="56" height="6" fill="#7d5533"/>` + [42, 68, 82].map((y) => `<circle cx="56" cy="${y}" r="3" fill="#5e3a1a"/>`).join("") + `<path d="M30 12 L14 42 L18 70 L26 66 Z M70 12 L86 42 L82 70 L74 66 Z" fill="${WF.manteau}"/>`,
+    anorak: `<path d="M32 14 Q50 2 68 14 L90 30 L84 70 L74 66 L76 88 Q50 94 24 88 L26 66 L16 70 L10 30 Z" fill="${WF.anorak}"/><path d="M34 14 Q50 0 66 14 Q62 28 50 28 Q38 28 34 14 Z" fill="#1f6fb0"/>` + [40, 54, 68, 80].map((y) => `<path d="M24 ${y} Q50 ${y + 5} 76 ${y}" stroke="#1f6fb0" stroke-width="2.5" fill="none"/>`).join("") + `<line x1="50" y1="28" x2="50" y2="90" stroke="#e8eef6" stroke-width="3"/>`,
+  };
+  const kleidBild = (id) => `<svg class="kleid-bild" viewBox="0 0 100 100" role="img" aria-label="${id}">${KLEID_BILD[id] || ""}</svg>`;
+
   // ---------- Gesicht ----------
   function augen(mood) {
     if (mood === "jubel" || mood === "mampf") return `<path d="M74 93 Q82 83 90 93 M110 93 Q118 83 126 93" stroke="#3a2a2a" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
@@ -96,21 +127,31 @@
     const kleid = KLEIDER[p.kleid] ? p.kleid : "kleid";
     const farbe = FARBEN[p.farbe] || FARBEN.rosa;
     const mood = o.mood || "froh";
+    const win = o.winter || [];
     let s = "";
     s += (HAAR_HINTEN[fr] || HAAR_HINTEN.kurz)(hc);
     // Beine und Schuhe
     if (kleid !== "prinzessin") {
       const strumpf = kleid === "ballett" ? "#f9cfe0" : haut;
       s += `<rect x="82" y="196" width="13" height="42" rx="6" fill="${strumpf}"/><rect x="105" y="196" width="13" height="42" rx="6" fill="${strumpf}"/>`;
-      const sc = SCHUHE[kleid];
-      s += `<ellipse cx="88" cy="241" rx="12" ry="7" fill="${sc}" stroke="${kleid === "sport" ? "#d5d5d5" : "none"}"/><ellipse cx="112" cy="241" rx="12" ry="7" fill="${sc}" stroke="${kleid === "sport" ? "#d5d5d5" : "none"}"/>`;
-      if (kleid === "regenjacke") s += `<rect x="80" y="218" width="17" height="24" rx="5" fill="#f7d038"/><rect x="103" y="218" width="17" height="24" rx="5" fill="#f7d038"/>`;
+      if (win.includes("chaussettes") && !win.includes("bottes")) s += W_BEIN.chaussettes();
+      if (win.includes("pantalon")) s += W_BEIN.pantalon();
+      if (win.includes("bottes")) s += W_BEIN.bottes();
+      else {
+        const sc = SCHUHE[kleid];
+        s += `<ellipse cx="88" cy="241" rx="12" ry="7" fill="${sc}" stroke="${kleid === "sport" ? "#d5d5d5" : "none"}"/><ellipse cx="112" cy="241" rx="12" ry="7" fill="${sc}" stroke="${kleid === "sport" ? "#d5d5d5" : "none"}"/>`;
+        if (kleid === "regenjacke") s += `<rect x="80" y="218" width="17" height="24" rx="5" fill="#f7d038"/><rect x="103" y="218" width="17" height="24" rx="5" fill="#f7d038"/>`;
+      }
     }
     // Hals und Kleid
     s += `<rect x="92" y="122" width="16" height="16" rx="6" fill="${haut}"/>`;
     s += KLEIDER[kleid](farbe);
-    // Arme
-    const arm = (x1, y1, x2, y2) => `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="${kleid === "regenjacke" ? "#f7d038" : kleid === "schlafanzug" ? "#9fc3ee" : haut}" stroke-width="13" stroke-linecap="round"/><circle cx="${x2}" cy="${y2}" r="7.5" fill="${haut}"/>`;
+    const oben = win.includes("anorak") ? "anorak" : win.includes("manteau") ? "manteau" : win.includes("pull") ? "pull" : null;
+    if (win.includes("pull") && oben !== "pull") s += W_KOERPER.pull();
+    if (oben) s += W_KOERPER[oben]();
+    // Arme (mit Ärmeln und Handschuhen, wenn die Puppe sie trägt)
+    const aermel = oben ? WF[oben] : kleid === "regenjacke" ? "#f7d038" : kleid === "schlafanzug" ? "#9fc3ee" : haut;
+    const arm = (x1, y1, x2, y2) => `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="${aermel}" stroke-width="13" stroke-linecap="round"/>` + (win.includes("gants") ? handschuh(x2, y2) : `<circle cx="${x2}" cy="${y2}" r="7.5" fill="${haut}"/>`);
     if (o.buch) s += arm(74, 144, 84, 176) + arm(126, 144, 116, 176);
     else if (mood === "jubel") s += arm(72, 144, 48, 108) + arm(128, 144, 152, 108);
     else s += arm(72, 144, 60, 190) + arm(128, 144, 140, 190);
@@ -122,7 +163,9 @@
     s += augen(mood);
     s += `<ellipse cx="100" cy="102" rx="3" ry="2.2" fill="${dunkler(haut, 0.25)}"/>`;
     s += mund(mood);
-    for (const z of SCHMUCK_REIHE) if ((o.traegt || []).includes(z) && !(o.buch && z === "tasche")) s += SCHMUCK[z];
+    if (win.includes("echarpe")) s += W_KOPF.echarpe();
+    if (win.includes("bonnet")) s += W_KOPF.bonnet();
+    for (const z of SCHMUCK_REIHE) if ((o.traegt || []).includes(z) && !(o.buch && z === "tasche") && !(win.includes("bonnet") && ["haarreif", "blumenkranz", "schleife", "sonnenhut"].includes(z))) s += SCHMUCK[z];
     if (o.essen) s += `<text x="126" y="132" font-size="30" text-anchor="middle">${o.essen}</text>`;
     const g = `<g>${s}</g>`;
     if (o.nurInhalt) return g;
@@ -159,7 +202,7 @@
     for (const z of ["lichterkette", "lampe", "bild", "regal", "vase", "teppich", "bett", "pflanze", "teetisch"]) if (besitz.includes(z)) s += MOEBEL[z];
     if (besitz.includes("kuscheltier")) s += MOEBEL.kuscheltier(besitz.includes("bett"));
     if (st >= 3) s += `<g class="glanz">${[[160, 40], [250, 30], [370, 130], [20, 150], [210, 120]].map(([x, y]) => `<path d="M${x} ${y - 8} l3 6 l6 3 l-6 3 l-3 6 l-3 -6 l-6 -3 l6 -3 Z" fill="#f6d44b"/>`).join("")}</g>`;
-    s += `<g transform="translate(128 60) scale(.72)"><g class="puppe-im-zimmer">${puppeSvg(p, { mood: o.mood, traegt: o.traegt, essen: o.essen, nurInhalt: true })}</g></g>`;
+    s += `<g transform="translate(128 60) scale(.72)"><g class="puppe-im-zimmer">${puppeSvg(p, { mood: o.mood, traegt: o.traegt, essen: o.essen, winter: o.winter, nurInhalt: true })}</g></g>`;
     if (besitz.includes("puppenwagen")) s += MOEBEL.puppenwagen;
     return `<svg class="zimmer-svg" viewBox="0 0 400 260" role="img" aria-label="Puppenstube">${s}</svg>`;
   }
@@ -246,5 +289,5 @@
   // ---------- App-Symbol (Kopf der Puppe) ----------
   const iconSvg = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" fill="#fde7ef"/><g transform="translate(-4 4) scale(1.0)">${puppeSvg({ haut: 1, haar: "braun", frisur: "zoepfe", kleid: "kleid", farbe: "lila" }, { mood: "froh", traegt: ["schleife"], nurInhalt: true })}</g></svg>`;
 
-  root.PS_PUPPE = { puppeSvg, kopfSvg, zimmerSvg, bloeckeSvg, sprungSvg, strahlSvg, iconSvg, KLEIDER: Object.keys(KLEIDER), SCHMUCK: Object.keys(SCHMUCK), MOEBEL: Object.keys(MOEBEL), heller };
+  root.PS_PUPPE = { kleidBild, WINTER_FARBEN: WF, puppeSvg, kopfSvg, zimmerSvg, bloeckeSvg, sprungSvg, strahlSvg, iconSvg, KLEIDER: Object.keys(KLEIDER), SCHMUCK: Object.keys(SCHMUCK), MOEBEL: Object.keys(MOEBEL), heller };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -26,6 +26,12 @@ export function pruefer() {
 // Löst die aktuelle Aufgabe über die Tastatur auf dem Bildschirm (falsch = erstes Feld zuerst falsch)
 export async function loese(p, falsch) {
   const t = await p.evaluate(() => window.__PS.aufgabe());
+  if (t.art === "buchstaben") {
+    if (falsch) { const i = t.kacheln.findIndex((c) => c !== Array.from(t.ziel)[0]); await p.click(`[data-act=kachel][data-arg="${i}"]`); }
+    const benutzt = new Set();
+    for (const c of Array.from(t.ziel)) { const i = t.kacheln.findIndex((k, j) => k === c && !benutzt.has(j)); benutzt.add(i); await p.click(`[data-act=kachel][data-arg="${i}"]`); }
+    return t;
+  }
   if (t.art === "wahl") {
     if (falsch) { const i = t.optionen.findIndex((o) => o !== t.loesung); await p.click(`[data-act=waehle][data-arg="${i}"]`); }
     await p.click(`[data-act=waehle][data-arg="${t.optionen.indexOf(t.loesung)}"]`);

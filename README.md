@@ -1,6 +1,6 @@
 # Puppenstube
 
-Lern-App fürs iPad für die 3. Klasse: Minus rechnen im Zahlenraum bis 1000. Jeden Tag kommt eine Puppenfreundin oder ein Puppenfreund zu Besuch und braucht Hilfe beim Rechnen. Die Tagesmission hat drei kurze Etappen mit je 5 Aufgaben, dazwischen ein Geschenk und eine Bewegungspause. Mit den Edelsteinen vom Rechnen bekommt die eigene Puppe Kleider, Schmuck, Möbel und Leckeres für die Teeparty.
+Lern-App fürs iPad für die 3. Klasse: Minus rechnen im Zahlenraum bis 1000 und Französisch-Vokabeln. Jeden Tag kommt eine Puppenfreundin oder ein Puppenfreund zu Besuch und braucht Hilfe beim Rechnen. Die Tagesmission hat drei kurze Etappen mit je 5 Aufgaben, dazwischen ein Geschenk und eine Bewegungspause. Mit den Edelsteinen vom Rechnen bekommt die eigene Puppe Kleider, Schmuck, Möbel und Leckeres für die Teeparty.
 
 Die App ist eine Web-App ohne Build-Schritt (reines JavaScript im Ordner `public/`), läuft offline und wird über GitHub Pages veröffentlicht.
 
@@ -34,9 +34,18 @@ Oben rechts steht die Versionsnummer. So sieht man nach einem Update, ob die neu
 
 Jeder Lernteil hat drei Stufen: geführt (Zwischenschritte vorgegeben), selbst zerlegen, frei (manchmal als Rechengeschichte). Ein Thema öffnet sich, wenn das vorige zu 60 % sitzt. In der Eltern-Übersicht lassen sich Themen freischalten und ein Schwerpunkt setzen.
 
+## Französisch mit Camille
+
+Die Puppenfreundin Camille übt die Vokabeln der Arbeitsblätter: Winterkleider (les vêtements d'hiver), Farben (les couleurs, auch Farben mischen) und Zahlen von 1 bis 20. Camille spricht jedes Wort mit der französischen Stimme des iPads vor.
+
+- **Wörter anschauen:** Wortkarten mit Bild, französischem und deutschem Wort. Antippen oder «Alle anhören».
+- **Üben:** Hören und Bild wählen, Bild und Wort, Deutsch und Französisch, kleiner Begleiter (un, une, des), Farben mischen, Zählen, Wort aus Buchstaben legen. Ein Wort kommt erst zum Buchstabenlegen, wenn es beim Erkennen und Wissen sitzt.
+- **Vokabel-Training:** drei Etappen (Kleider, Farben, Zahlen) mit Geschenken und Bewegungspausen. Danach schreibt Camille ins Freundebuch.
+- **Winterkleider:** Jedes Kleidungsstück, das das Kind auf Französisch gewusst hat, darf die Puppe in der Puppenstube anziehen. Beim Antippen sagt Camille das Wort.
+
 ## Für Eltern
 
-Langer Fingerdruck auf «Für Eltern» unten rechts: Fortschritt je Thema, was noch wackelt, Übungs- und Hausaufgabenzeit der letzten 7 Tage, Lernpfad, Einstellungen und Sicherungsdatei.
+Langer Fingerdruck auf «Für Eltern» unten rechts: Fortschritt je Thema (auch Französisch), was noch wackelt, Übungs- und Hausaufgabenzeit der letzten 7 Tage, Lernpfad, Einstellungen und Sicherungsdatei.
 
 ## Tests
 
@@ -47,6 +56,8 @@ npm test
 ```
 
 - `tools/test-logic.mjs` erzeugt jede Aufgabenart in jeder Stufe 400-mal und rechnet jede Zeile unabhängig nach, dazu Erklärungen, Spielstand und Freischalten.
+- `tools/test-franz.mjs` vergleicht die Wortliste mit den Arbeitsblättern und prüft jede Französisch-Aufgabe in jeder Art.
+- `tools/e2e-franz.mjs` spielt das Vokabel-Training wie ein Kind durch.
 - `tools/e2e.mjs` spielt eine ganze Tagesmission wie ein Kind durch.
 - `tools/e2e-speicher.mjs` prüft, dass der Spielstand nie verloren geht.
 - `tools/e2e-geraete.mjs` prüft iPad hochkant und quer, kleines iPad und Handy.

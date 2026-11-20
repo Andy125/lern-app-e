@@ -25,12 +25,16 @@ jobs:
         run: npm install
       - name: Logik (jede Aufgabe nachgerechnet)
         run: node tools/test-logic.mjs
+      - name: Französisch (Wortliste und jede Aufgabe geprüft)
+        run: node tools/test-franz.mjs
       - name: Version und Offline-Liste
         run: node tools/test-version.mjs
       - name: Browser installieren
         run: npx playwright install --with-deps chromium
       - name: Ablauf wie ein Kind
         run: node tools/e2e.mjs
+      - name: Französisch wie ein Kind
+        run: node tools/e2e-franz.mjs
       - name: Spielstand nie verlieren
         run: node tools/e2e-speicher.mjs
       - name: iPad hochkant, quer und Handy

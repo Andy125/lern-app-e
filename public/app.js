@@ -1,7 +1,7 @@
 // Puppenstube: Oberfläche. Logik in logic.js, Zeichnungen in puppe.js, Erklärungen in erklaerungen.js.
 (function () {
   "use strict";
-  const L = window.PS, P = window.PS_PUPPE, ERK = window.PS_ERKLAER || {}, VER = window.PS_VERSION || { n: 0, date: "" };
+  const L = window.PS, P = window.PS_PUPPE, ERK = window.PS_ERKLAER || {}, FR = window.PS_FR, VER = window.PS_VERSION || { n: 0, date: "" };
   const TEST = window.__PS_TEST || {}; // Testschalter, nur in den automatischen Tests gesetzt
   const KEY = "puppenstube-v1", BAK = KEY + "-bak", VOR = KEY + "-vor-laden";
   const app = document.getElementById("app");
@@ -86,8 +86,9 @@
   const puppeName = () => (S.puppe && S.puppe.name) || "deine Puppe";
   const tag = () => { const d = heute(); return S.tage[d] || (S.tage[d] = { sek: 0, aufgaben: 0, richtig: 0, etappen: 0, mission: false, haSek: 0, perlen: 0 }); };
   const tagLesen = () => S.tage[heute()] || { sek: 0, aufgaben: 0, richtig: 0, etappen: 0, mission: false, haSek: 0, perlen: 0 };
-  const puppe = (mood, extra) => P.puppeSvg(S.puppe, Object.assign({ mood, traegt: S.traegt }, extra || {}));
-  const freund = (id) => L.freundById(id) || L.FREUNDE[0];
+  const winter = () => (S.fr ? S.fr.traegt : []);
+  const puppe = (mood, extra) => P.puppeSvg(S.puppe, Object.assign({ mood, traegt: S.traegt, winter: winter() }, extra || {}));
+  const freund = (id) => (id === "camille" ? FR.CAMILLE : L.freundById(id) || L.FREUNDE[0]);
   const freundKopf = (f, mood) => P.kopfSvg(f.look, { mood: mood || "froh" });
   const skillName = (id) => L.SKILL_NAMEN[id] || id;
 
@@ -119,6 +120,28 @@
       const v = speechSynthesis.getVoices().find((x) => /^de/i.test(x.lang)); if (v) u.voice = v;
       speechSynthesis.speak(u);
     } catch (e) { /* ohne Vorlesen */ }
+  }
+  // Französisch: Stimme fr-FR, etwas langsamer. fertig wird nach dem Sprechen aufgerufen.
+  function sprichFr(text, fertig) {
+    try {
+      if (!("speechSynthesis" in window) || !text) { if (fertig) fertig(); return; }
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(String(text)); u.lang = "fr-FR"; u.rate = 0.8;
+      const vs = speechSynthesis.getVoices();
+      const v = vs.find((x) => /^fr[-_]FR/i.test(x.lang)) || vs.find((x) => /^fr/i.test(x.lang)); if (v) u.voice = v;
+      if (fertig) { u.onend = fertig; u.onerror = fertig; }
+      speechSynthesis.speak(u);
+    } catch (e) { if (fertig) fertig(); }
+  }
+  let alleTimer = null;
+  function alleAnhoeren(liste, i) {
+    clearTimeout(alleTimer);
+    if (ui.ansicht !== "fr-karten" || i >= liste.length) { if (ui.ansicht === "fr-karten") { ui.spielt = null; render(); } return; }
+    ui.spielt = liste[i].id; render();
+    let weiter = false;
+    const naechste = () => { if (weiter) return; weiter = true; alleTimer = setTimeout(() => alleAnhoeren(liste, i + 1), 700); };
+    sprichFr(FR.sprechText(liste[i]), naechste);
+    setTimeout(naechste, 3500); // falls das Gerät keine französische Stimme hat
   }
   function konfetti() {
     if (S.einst.ruhig) return;
@@ -160,7 +183,7 @@
   let ui;
   const startUi = () => ({ ansicht: S.erstellt ? "start" : "willkommen", schritt: 1 });
   ui = startUi();
-  const gehe = (ansicht, extra) => { zeitBuchen(); clearInterval(haTimer); ui = Object.assign({ ansicht }, extra || {}); render(); window.scrollTo(0, 0); };
+  const gehe = (ansicht, extra) => { zeitBuchen(); clearInterval(haTimer); clearTimeout(alleTimer); ui = Object.assign({ ansicht }, extra || {}); render(); window.scrollTo(0, 0); };
 
   // ================= Kopfzeile =================
   function kopf(titel, zurueck) {
@@ -213,7 +236,7 @@
     const fok = L.themaById(L.fokus(S));
     return `${kopf()}<main class="start">
       <section class="zimmer-box" data-act="stube" aria-label="Zur Puppenstube">
-        ${P.zimmerSvg(S.puppe, { besitz: S.besitz, traegt: S.traegt, stufe: L.stufe(S.punkte), mood: fertig ? "jubel" : "froh" })}
+        ${P.zimmerSvg(S.puppe, { besitz: S.besitz, traegt: S.traegt, winter: winter(), stufe: L.stufe(S.punkte), mood: fertig ? "jubel" : "froh" })}
         <div class="sprechblase">${fertig ? `Mission geschafft! Ich bin so stolz auf dich, ${esc(S.name)}!` : fuell(GRUSS[tagIndex() % GRUSS.length])}</div>
       </section>
       <section class="besuch karte${fertig ? " erledigt" : ""}">
@@ -224,6 +247,11 @@
           <div class="etappen-punkte" aria-label="Etappen">${punkte}</div>
         </div>
         <button class="btn haupt gross" data-act="mission">${knopf}</button>
+      </section>
+      <section class="besuch karte franz-karte">
+        <div class="besuch-kopf">${freundKopf(FR.CAMILLE)}</div>
+        <div class="besuch-text"><h2>🇫🇷 Französisch mit Camille</h2><p>Winterkleider, Farben und Zahlen bis 20. ${FR.bereitschaft(S)} % sitzen schon.</p></div>
+        <button class="btn haupt gross" data-act="franz">Bonjour!</button>
       </section>
       <p class="fokus-zeile">Gerade dran: ${esc(fok.icon)} <b>${esc(fok.name)}</b></p>
       <section class="kacheln">
@@ -243,14 +271,14 @@
   // ================= Runden =================
   function starteRunde(typ, etappen, titel) {
     const fid = L.besuchFuer(S, heute());
-    ui = { ansicht: "etappe-start", runde: { typ, titel, etappen, nr: 0, freund: fid, mission: typ === "mission" && !tag().mission } };
+    ui = { ansicht: "etappe-start", runde: { typ, titel, etappen, nr: 0, freund: fid, mission: typ === "mission" && !tag().mission, winterNeu: [] } };
     if (ui.runde.mission) ui.runde.nr = Math.min(tag().etappen, etappen.length - 1);
     speichern(); render();
   }
   function bereiteEtappe() {
     const R = ui.runde, e = R.etappen[R.nr];
     const n = e.n || S.einst.etappe;
-    R.specs = L.buildEtappe(S, { n, seed: zufall(), art: e.art, thema: e.thema, skill: e.skill, freund: R.freund });
+    R.specs = e.fach === "fr" ? FR.buildEtappe(S, { n, seed: zufall(), thema: e.thema, typ: e.typ }) : L.buildEtappe(S, { n, seed: zufall(), art: e.art, thema: e.thema, skill: e.skill, freund: R.freund });
     R.i = -1; R.ersteRichtig = 0; R.nochmal = 0; R.muenzenStart = S.muenzen; R.neuFrei = []; R.geschenk = null;
     if (!R.specs.length) { toast("Hier gibt es gerade nichts zu üben."); gehe("start"); return false; }
     return true;
@@ -259,17 +287,20 @@
     const R = ui.runde; R.i++;
     if (R.i >= R.specs.length) return etappeFertig();
     const s = R.specs[R.i];
-    R.task = L.makeTask(s.skill, s.stufe, s.seed, { freund: s.freund });
+    R.task = s.fach === "fr" ? FR.makeTask(s) : L.makeTask(s.skill, s.stufe, s.seed, { freund: s.freund });
     if (!R.task) return naechsteAufgabe();
     const t = R.task;
-    R.werte = t.felder.map(() => ""); R.fstat = t.felder.map(() => "offen"); R.fversuche = t.felder.map(() => 0);
+    const felder = t.felder || [];
+    R.werte = felder.map(() => ""); R.fstat = felder.map(() => "offen"); R.fversuche = felder.map(() => 0);
     R.aktiv = 0; R.fehler = 0; R.tippOffen = false; R.meldung = null; R.hilfeBild = null; R.fertig = false; R.wackel = -1;
     R.wahl = null; R.falsch = []; R.versuche = 0;
+    R.gelegt = []; R.benutzt = []; R.falschKachel = -1; R.zeigeWort = false; R.neuWinter = null;
     // Neuer Lernteil? Erst kurz erklären.
-    if (!S.gesehen[s.skill] && ERK[s.skill]) { ui.ansicht = "erklaerung"; ui.erk = { skill: s.skill, seite: 0, ausRunde: true }; render(); return; }
+    if (s.fach !== "fr" && !S.gesehen[s.skill] && ERK[s.skill]) { ui.ansicht = "erklaerung"; ui.erk = { skill: s.skill, seite: 0, ausRunde: true }; render(); return; }
     ui.ansicht = "runde"; letzteAktion = Date.now();
     render();
-    if (S.einst.vorlesen) vorlesen();
+    if (t.fach === "fr") { if (t.typ === "hoeren" || t.typ === "fr-de") sprichFr(t.sprich); }
+    else if (S.einst.vorlesen) vorlesen();
   }
   const ersteOffene = () => ui.runde.fstat.indexOf("offen");
 
@@ -315,7 +346,10 @@
     const R = ui.runde, t = R.task;
     const geholfen = R.geholfen || R.fstat.includes("geholfen");
     const erster = R.fehler === 0 && !R.tippOffen;
-    L.record(S, t.skill, erster, heute());
+    if (t.fach === "fr") {
+      const rr = FR.record(S, t.wort, erster, heute());
+      if (rr.neuWinter) { R.neuWinter = rr.neuWinter; R.winterNeu = (R.winterNeu || []).concat(rr.neuWinter); }
+    } else L.record(S, t.skill, erster, heute());
     const m = R.fehler === 0 ? L.LOHN.richtig : L.LOHN.spaeter;
     S.muenzen += m; S.punkte += R.fehler === 0 ? L.LOHN.punkteRichtig : L.LOHN.punkteSpaeter;
     const T = tag(); T.aufgaben++; if (R.fehler === 0) T.richtig++;
@@ -326,9 +360,10 @@
     R.lob = R.fehler === 0 ? pick(LOB) : pick(LOB_SPAETER);
     if (geholfen) R.lob = "Das üben wir gleich noch einmal.";
     R.gelernt = geholfen || R.fehler > 0;
-    if (geholfen && R.nochmal < 2) { R.nochmal++; R.specs.push({ skill: t.skill, stufe: t.stufe, seed: zufall(), freund: R.freund }); }
-    const neu = L.aktualisiereOffen(S); if (neu.length) R.neuFrei = (R.neuFrei || []).concat(neu);
+    if (geholfen && R.nochmal < 2) { R.nochmal++; R.specs.push(t.fach === "fr" ? { fach: "fr", wort: t.wort, typ: t.typ, stufe: t.stufe, seed: zufall() } : { skill: t.skill, stufe: t.stufe, seed: zufall(), freund: R.freund }); }
+    if (t.fach !== "fr") { const neu = L.aktualisiereOffen(S); if (neu.length) R.neuFrei = (R.neuFrei || []).concat(neu); }
     speichern(); render(); plusAnzeigen("+" + m);
+    if (t.fach === "fr") sprichFr(t.sprichNachher || t.sprich);
     if (kette) { ton(12, "glitzer"); konfetti(); toast(`Glitzerkette fertig! +${L.LOHN.kette} 💎`); }
     else if (!geholfen) ton(8, R.fehler === 0 ? "glitzer" : null);
   }
@@ -339,9 +374,16 @@
       const T = tag(); T.etappen = Math.max(T.etappen, R.nr + 1);
       if (R.nr + 1 >= R.etappen.length) { T.mission = true; S.muenzen += L.LOHN.mission; R.dank = L.freundDanke(S, R.freund, heute()); }
     }
+    // Französisch-Runde fertig: Camille bedankt sich und schreibt ins Freundebuch
+    const frFertig = R.etappen.every((e) => e.fach === "fr") && R.nr + 1 >= R.etappen.length;
+    if (frFertig) {
+      S.fr.runden++;
+      if (S.fr.camille) S.fr.camille.herzen++; else { S.fr.camille = { ab: heute(), herzen: 1 }; R.camilleNeu = true; }
+      if (R.etappen.length >= 3) S.muenzen += L.LOHN.mission;
+    }
     speichern();
     const missionFertig = R.mission && R.nr + 1 >= R.etappen.length;
-    ui.ansicht = missionFertig ? "mission-ende" : "etappe-ende";
+    ui.ansicht = missionFertig ? "mission-ende" : frFertig ? "franz-ende" : "etappe-ende";
     letzteAktion = 0;
     render(); konfetti(); ton(12, "glitzer");
   }
@@ -450,26 +492,27 @@
       <button class="zurueck" data-act="pause-runde" aria-label="Pause, zurück zur Startseite">✕</button>
       <div class="runde-info"><div class="runde-titel">${esc(titel)}</div><div class="fortschritt" aria-label="Aufgabe ${R.i + 1} von ${R.specs.length}">${dots}</div></div>
       ${kette()}
-      <div class="mini-puppe ${R.fertig && !R.gelernt && !S.einst.ruhig ? "huepf" : ""}">${P.kopfSvg(S.puppe, { mood, traegt: S.traegt })}</div>
+      <div class="mini-puppe ${R.fertig && !R.gelernt && !S.einst.ruhig ? "huepf" : ""}">${P.kopfSvg(S.puppe, { mood, traegt: S.traegt, winter: winter() })}</div>
       <div class="muenzen">💎 <b>${S.muenzen}</b></div></header>`;
   }
   function runde() {
     const R = ui.runde, t = R.task;
     let unten = "";
     if (R.fertig) {
-      const erkl = R.gelernt && t.erklaerung ? `<p>${esc(t.erklaerung)}</p>` : "";
+      const erkl = (R.gelernt || t.fach === "fr") && t.erklaerung ? `<p>${t.fach === "fr" ? `<button class="vorlesen klein" data-act="fr-sag-loesung" aria-label="Auf Französisch anhören">🔊</button> ` : ""}${esc(t.erklaerung)}</p>` : "";
       const merk = R.gelernt && t.merk ? `<p class="merk">🧠 ${esc(t.merk)}</p>` : "";
-      unten = `<div class="rueck ${R.gelernt ? "loesung" : "gut"}" role="status"><b>${esc(R.lob)}</b>${erkl}${merk}<button class="btn haupt gross" data-act="weiter">Weiter ➜</button></div>`;
+      const neuW = R.neuWinter ? `<p class="winter-hinweis">${P.kleidBild(R.neuWinter)}<span>❄️ Neu für ${esc(puppeName())}: <b>${esc(FR.zeige(FR.wortById(R.neuWinter)))}</b>! In der Puppenstube kann sie es anziehen.</span></p>` : "";
+      unten = `<div class="rueck ${R.gelernt ? "loesung" : "gut"}" role="status"><b>${esc(R.lob)}</b>${erkl}${merk}${neuW}<button class="btn haupt gross" data-act="weiter">Weiter ➜</button></div>`;
     } else if (R.meldung) {
       unten = `<div class="rueck ${R.meldung.art === "tipp" ? "tipp" : "loesung"}" role="status"><b>${esc(R.meldung.text)}</b>${R.meldung.tipp ? `<p>💡 ${esc(R.meldung.tipp)}</p>` : ""}${R.hilfeBild ? bildHtml(R.hilfeBild) : ""}</div>`;
     } else if (t.tipp || t.hilfe) {
       unten = R.tippOffen ? `<div class="rueck tipp"><p>💡 ${esc(t.tipp)}</p>${bildHtml(t.hilfe)}</div>` : `<button class="tipp-knopf" data-act="tipp-zeigen">💡 Ich brauche einen Tipp</button>`;
     }
-    const istWahl = t.art === "wahl";
+    const istWahl = t.art !== "felder";
     const inhalt = `<div class="frage-zeile"><h2 class="frage">${esc(t.frage)}</h2><button class="vorlesen" data-act="vorlesen" aria-label="Vorlesen">🔊</button></div>
       ${t.text ? `<p class="aufgaben-text">${esc(t.text)}</p>` : ""}
       ${t.fig ? bildHtml(t.fig) : ""}
-      ${istWahl ? wahlHtml(t) : zeilenHtml(t)}
+      ${t.art === "buchstaben" ? buchstabenHtml(t) : t.fach === "fr" ? frWahlHtml(t) : istWahl ? wahlHtml(t) : zeilenHtml(t)}
       ${unten}`;
     return `${rundeKopf()}<main class="runde-flaeche${istWahl || R.fertig ? " ohne-tasten" : ""}"><section class="aufgabe art-${t.art} layout-${t.layout}">${inhalt}</section>${istWahl || R.fertig ? "" : `<section class="tastatur">${tastatur()}</section>`}</main>`;
   }
@@ -479,11 +522,13 @@
     const f = freund(R.freund);
     const titel = R.etappen.length > 1 ? `Etappe ${R.nr + 1} von ${R.etappen.length}` : (R.titel || "Los geht's");
     const besuch = R.mission && R.nr === 0 && !tagLesen().etappen;
-    const th = e.thema ? L.themaById(e.thema) : null;
+    const istFr = e.fach === "fr";
+    const th = e.thema && !istFr ? L.themaById(e.thema) : null;
     return `${kopf("", true)}<main class="mitte">
-      ${besuch ? `<div class="besuch-gross"><div class="gross-puppe klein">${P.puppeSvg(f.look, { mood: "froh" })}</div><div class="sprechblase links">${esc(f.bitte)}</div></div>` : `<div class="gross-puppe">${puppe("jubel")}</div>`}
+      ${istFr ? `<div class="besuch-gross"><div class="gross-puppe klein">${P.puppeSvg(FR.CAMILLE.look, { mood: "jubel" })}</div><div class="sprechblase links">Allez, on y va! Los geht's, ${esc(S.name)}! Hör gut zu, ich sage dir jedes Wort vor.</div></div>`
+        : besuch ? `<div class="besuch-gross"><div class="gross-puppe klein">${P.puppeSvg(f.look, { mood: "froh" })}</div><div class="sprechblase links">${esc(f.bitte)}</div></div>` : `<div class="gross-puppe">${puppe("jubel")}</div>`}
       <h1>${esc(titel)}</h1><p class="untertitel">${esc(e.titel)}${th && e.art !== "warm" ? ": " + esc(th.icon + " " + th.name) : ""}</p>
-      <p class="leise">${e.n || S.einst.etappe} Aufgaben.${R.mission && R.nr < R.etappen.length - 1 ? " Danach ein Geschenk und eine kurze Bewegungspause." : ""}</p>
+      <p class="leise">${e.n || S.einst.etappe} Aufgaben.${(R.mission || istFr) && R.nr < R.etappen.length - 1 ? " Danach ein Geschenk und eine kurze Bewegungspause." : ""}</p>
       <button class="btn haupt gross" data-act="etappe-los">Los geht's!</button></main>`;
   }
   function etappeEnde() {
@@ -498,7 +543,7 @@
       ${frei.length ? `<p class="frei-banner">🎉 Neu auf deinem Lernpfad: ${frei.map((t) => esc(t.icon + " " + t.name)).join(", ")}</p>` : ""}
       ${g ? `<div class="geschenk offen">${g.typ === "sticker" ? `<span class="sticker-gross">${g.id}</span><p>${g.neu ? "Ein neuer Sticker für dein Album!" : "Noch ein Sticker für dein Album!"}</p>` : `<span class="sticker-gross">💎</span><p>${g.n} Edelsteine!</p>`}</div>`
         : `<button class="geschenk" data-act="geschenk" aria-label="Geschenk öffnen"><span class="paket">🎁</span><span>Tippe auf dein Geschenk!</span></button>`}
-      ${g ? (weiter ? (S.einst.pause && R.mission ? `<button class="btn haupt gross" data-act="bewegung">Weiter zur Bewegungspause</button>` : `<button class="btn haupt gross" data-act="naechste-etappe">Nächste Etappe</button>`) : `<button class="btn haupt gross" data-act="heim">Fertig!</button>`) : ""}
+      ${g ? (weiter ? (S.einst.pause && (R.mission || R.typ === "franz") ? `<button class="btn haupt gross" data-act="bewegung">Weiter zur Bewegungspause</button>` : `<button class="btn haupt gross" data-act="naechste-etappe">Nächste Etappe</button>`) : `<button class="btn haupt gross" data-act="heim">Fertig!</button>`) : ""}
       ${g && weiter ? `<button class="btn leise-btn" data-act="heim">Für heute aufhören</button>` : ""}</main>`;
   }
   let pauseTimer = null;
@@ -532,6 +577,84 @@
       <button class="btn" data-act="stube">Zur Puppenstube</button></main>`;
   }
 
+  // ================= Französisch mit Camille =================
+  const frBildVon = (w) => (w.thema === "kleidung" ? { typ: "kleid", id: w.id } : w.thema === "farben" ? { typ: "farbe", id: w.id } : { typ: "ziffer", zahl: w.zahl });
+  function frBild(b, gross) {
+    if (!b) return "";
+    if (b.typ === "kleid") return `<span class="fr-bild${gross ? " gross" : ""}">${P.kleidBild(b.id)}</span>`;
+    if (b.typ === "farbe") { const w = FR.wortById(b.id); return `<span class="farbklecks${gross ? " gross" : ""}${b.id === "blanc" ? " weiss" : ""}" style="background:${w.hex}"></span>`; }
+    if (b.typ === "ziffer") return `<span class="ziffer${gross ? " gross" : ""}">${b.zahl}</span>`;
+    return "";
+  }
+  const mischHtml = (aus, gibt, zeigen) => `<div class="fr-prompt mischen">${aus.map((id) => `<span class="misch-farbe">${frBild({ typ: "farbe", id })}<small>${esc(id)}</small></span>`).join("<b>+</b>")}<b>=</b><span class="misch-farbe">${zeigen ? frBild({ typ: "farbe", id: gibt }) + `<small>${esc(gibt)}</small>` : `<span class="farbklecks leer">?</span><small>&nbsp;</small>`}</span></div>`;
+  function frPrompt(t) {
+    const p = t.prompt, R = ui.runde;
+    switch (p.typ) {
+      case "hoeren": return `<div class="fr-prompt"><button class="hoer-knopf" data-act="fr-sag" aria-label="Noch einmal anhören">🔊</button>${R.tippOffen || R.fertig ? `<div class="fr-wort">${esc(FR.zeige(FR.wortById(t.wort)))}</div>` : `<p class="leise">Tippe auf den Lautsprecher, dann hörst du das Wort noch einmal.</p>`}</div>`;
+      case "bild": return `<div class="fr-prompt">${frBild(p.bild, true)}</div>`;
+      case "wort": return `<div class="fr-prompt">${p.bild ? frBild(p.bild, true) : ""}<div class="fr-wort">${esc(p.text)} <button class="vorlesen" data-act="fr-sag" aria-label="Anhören">🔊</button></div></div>`;
+      case "deutsch": return `<div class="fr-prompt"><div class="fr-wort deutsch">${esc(p.text)}</div></div>`;
+      case "artikel": return `<div class="fr-prompt">${frBild(p.bild, true)}<div class="fr-wort"><span class="vgl-platz${R.fertig ? " voll" : ""}">${R.fertig ? esc(t.loesung) : "?"}</span> ${esc(p.wort)}</div></div>`;
+      case "mischen": return mischHtml(p.aus, t.wort, R.fertig);
+      case "punkte": return `<div class="fr-prompt punkte">${Array.from({ length: Math.ceil(p.zahl / 5) }, (_, z) => `<div>${Array.from({ length: Math.min(5, p.zahl - z * 5) }, () => `<span>${p.ding}</span>`).join("")}</div>`).join("")}</div>`;
+    }
+    return "";
+  }
+  function frWahlHtml(t) {
+    const R = ui.runde, loes = R.fertig;
+    const opts = t.optionen.map((o, i) => {
+      let cls = "option" + (t.anzeige === "bild" ? " bild-option" : "") + (t.typ === "artikel" ? " zeichen" : "");
+      if (R.falsch.includes(o)) cls += " falsch";
+      if (loes && o === t.loesung) cls += " richtig";
+      return `<button class="${cls}" data-act="waehle" data-arg="${i}" ${loes || R.falsch.includes(o) ? "disabled" : ""} aria-label="${t.anzeige === "bild" ? "Bild " + (i + 1) : esc(o)}">${t.anzeige === "bild" ? frBild(t.bilder[o]) : t.typ === "artikel" ? `<b>${esc(o)}</b>` : esc(o)}</button>`;
+    }).join("");
+    return frPrompt(t) + `<div class="optionen${t.typ === "artikel" ? " drei" : ""}${t.anzeige === "bild" ? " bilder" : ""}">${opts}</div>`;
+  }
+  function buchstabenHtml(t) {
+    const R = ui.runde, ziel = Array.from(t.ziel);
+    const slots = ziel.map((c, i) => `<span class="slot${i < R.gelegt.length ? " voll" : i === R.gelegt.length && !R.fertig ? " jetzt" : ""}">${i < R.gelegt.length ? esc(R.gelegt[i]) : R.zeigeWort ? `<i>${esc(c)}</i>` : ""}</span>`).join("");
+    return `<div class="fr-prompt">${frBild(t.prompt.bild, true)}<div class="fr-wort deutsch">${esc(t.prompt.deutsch)} <button class="vorlesen" data-act="fr-sag" aria-label="Auf Französisch anhören">🔊</button></div></div>
+      <div class="wort-bau">${t.prompt.vorne ? `<span class="vorne">${esc(t.prompt.vorne)}</span>` : ""}<span class="slots">${slots}</span></div>
+      ${R.fertig ? "" : `<div class="buchst-reihe">${t.kacheln.map((c, i) => `<button class="buchst${R.benutzt.includes(i) ? " weg" : ""}${R.falschKachel === i ? " wackel" : ""}" data-act="kachel" data-arg="${i}" ${R.benutzt.includes(i) ? "disabled" : ""}>${esc(c)}</button>`).join("")}</div>`}`;
+  }
+  function franzSeite() {
+    const c = FR.CAMILLE;
+    return `${kopf("Französisch", true)}<main class="franz">
+      <div class="besuch-gross"><div class="gross-puppe klein">${P.puppeSvg(c.look, { mood: "jubel" })}</div><div class="sprechblase links">Bonjour, ${esc(S.name || "toi")}! Ich bin Camille. Wir üben zusammen Französisch. Schau dir zuerst die Wörter an und hör gut zu. Dann üben wir!</div></div>
+      <section class="karte training"><div><h2>Vokabel-Training</h2><p class="leise">3 Etappen mit je 6 Aufgaben: Winterkleider, Farben, Zahlen. Dazwischen Geschenke und Bewegungspausen.</p></div><button class="btn haupt gross" data-act="fr-training">Los geht's!</button></section>
+      ${FR.THEMEN.map((th) => { const b = FR.bereitschaft(S, th.id); return `<section class="karte fr-thema"><div class="fr-thema-kopf"><span class="station-nr">${th.icon}</span><div class="fr-thema-text"><b>${esc(th.name)}</b> <small class="leise">${esc(th.de)}</small><span class="balken"><i style="width:${b}%"></i></span><small class="leise">${b} % sitzen</small></div></div><div class="knopfzeile"><button class="btn" data-act="fr-karten" data-arg="${th.id}">👀 Wörter anschauen</button><button class="btn haupt" data-act="fr-ueben" data-arg="${th.id}">Üben</button></div></section>`; }).join("")}
+      <p class="leise mitte-text">❄️ Jedes Kleidungsstück, das du auf Französisch weißt, darf ${esc(puppeName())} in der Puppenstube anziehen.</p></main>`;
+  }
+  function frKarten() {
+    const th = FR.THEMEN.find((x) => x.id === ui.thema) || FR.THEMEN[0];
+    const ws = FR.imThema(th.id);
+    return `${kopf(th.name, true)}<main class="liste">
+      <p class="leise">Tippe auf eine Karte, dann sagt Camille das Wort.</p>
+      <div class="knopfzeile"><button class="btn" data-act="fr-alle">🔊 Alle anhören</button><button class="btn haupt" data-act="fr-ueben" data-arg="${th.id}">Jetzt üben</button><button class="btn leise-btn" data-act="franz">Zurück zu Camille</button></div>
+      <div class="wortkarten">${ws.map((w) => `<button class="wortkarte${ui.spielt === w.id ? " spielt" : ""}" data-act="fr-karte" data-arg="${w.id}">${frBild(frBildVon(w), true)}<b>${esc(FR.zeige(w))}</b><small>${esc(w.de)}</small></button>`).join("")}</div>
+      ${th.id === "kleidung" ? `<p class="merk">🧠 un und une heißen ein oder eine. des heißt mehrere: des gants, des bottes, des chaussettes.</p>` : ""}
+      ${th.id === "farben" ? `<h2>Farben mischen</h2><div class="misch-liste">${FR.MISCHUNGEN.map((m) => mischHtml(m.aus, m.gibt, true)).join("")}</div>` : ""}
+      ${th.id === "zahlen" ? `<p class="merk">🧠 Vorsicht, Zwillinge: deux und douze, trois und treize, quatre und quatorze, cinq und quinze, six und seize.</p>` : ""}</main>`;
+  }
+  function franzEnde() {
+    const R = ui.runde, c = FR.CAMILLE;
+    const neu = [...new Set(R.winterNeu || [])];
+    return `${kopf()}<main class="mitte">
+      <div class="besuch-gross"><div class="gross-puppe klein huepf">${P.puppeSvg(c.look, { mood: "jubel" })}</div><div class="sprechblase links">Merci, ${esc(S.name)}! ${esc(c.danke)}</div></div>
+      <h1>Super geübt! 🎉</h1>
+      ${R.etappen.length >= 3 ? `<p class="schatz">🎁 Schatztruhe: +${L.LOHN.mission} Edelsteine</p>` : ""}
+      <p>${R.camilleNeu ? "Camille hat eine Seite in dein Freundebuch geschrieben!" : `Camille schenkt dir ein Freundschaftsherz. ♥ ${S.fr.camille ? S.fr.camille.herzen : ""}`}</p>
+      ${neu.length ? `<p><b>Neu für ${esc(puppeName())}:</b></p><div class="winter-neu">${neu.map((id) => `<span>${P.kleidBild(id)}<small>${esc(FR.zeige(FR.wortById(id)))}</small></span>`).join("")}</div>` : ""}
+      <button class="btn haupt gross" data-act="stube-winter">${esc(puppeName())} anziehen</button>
+      <button class="btn" data-act="franz">Zurück zu Camille</button></main>`;
+  }
+  function winterLaden() {
+    return `<div class="laden">${FR.imThema("kleidung").map((w) => {
+      const hat = S.fr.winter.includes(w.id), an = S.fr.traegt.includes(w.id);
+      return `<button class="laden-ding winter${hat ? " hat" : " teuer"}${an ? " an" : ""}" data-act="winter" data-arg="${w.id}">${P.kleidBild(w.id)}<span>${esc(FR.zeige(w))}</span><small>${hat ? (an ? "trägt sie" : "anziehen") : "🔒 bei Camille lernen"}</small></button>`;
+    }).join("")}</div><p class="leise klein mitte-text">Tippe auf ein Kleidungsstück. Camille sagt dir, wie es auf Französisch heißt.</p>`;
+  }
+
   // ================= So geht's =================
   function erklaerung() {
     const E = ui.erk, seiten = ERK[E.skill] || [];
@@ -539,7 +662,7 @@
     const letzte = E.seite >= seiten.length - 1;
     return `${kopf("So geht's", true)}<main class="erklaerung">
       <p class="erk-titel">💡 ${esc(skillName(E.skill))}</p>
-      <div class="erk-kopf"><div class="mini-puppe gross">${P.kopfSvg(S.puppe, { mood: letzte ? "jubel" : "froh", traegt: S.traegt })}</div><div class="sprechblase links">${esc(s.text)}<button class="vorlesen klein" data-act="sag" data-arg="${esc(s.text)}" aria-label="Vorlesen">🔊</button></div></div>
+      <div class="erk-kopf"><div class="mini-puppe gross">${P.kopfSvg(S.puppe, { mood: letzte ? "jubel" : "froh", traegt: S.traegt, winter: winter() })}</div><div class="sprechblase links">${esc(s.text)}<button class="vorlesen klein" data-act="sag" data-arg="${esc(s.text)}" aria-label="Vorlesen">🔊</button></div></div>
       <div class="erk-bild">${bildHtml(s.bild)}</div>
       <div class="erk-punkte">${seiten.map((_, i) => `<i class="${i === E.seite ? "jetzt" : i < E.seite ? "fertig" : ""}"></i>`).join("")}</div>
       <div class="knopfzeile mitte-zeile">
@@ -584,8 +707,8 @@
     const sticker = L.STICKER.filter((k) => S.sticker[k]).length;
     return `${kopf("Freundebuch", true)}<main class="liste">
       <p class="leise">${zahl ? `${zahl} von ${L.FREUNDE.length} Freundinnen und Freunden haben schon in dein Buch geschrieben.` : "Hilf bei der Tagesmission, dann schreiben deine Puppenfreunde hier hinein."}</p>
-      <div class="freunde">${L.FREUNDE.map((f) => {
-        const x = S.freunde[f.id];
+      <div class="freunde">${(S.fr && S.fr.camille ? [FR.CAMILLE] : []).concat(L.FREUNDE).map((f) => {
+        const x = f.id === "camille" ? S.fr.camille : S.freunde[f.id];
         return x ? `<button class="freund-karte" data-act="freund" data-arg="${f.id}">${freundKopf(f)}<b>${esc(f.name)}</b><small>♥ ${x.herzen}</small></button>`
           : `<div class="freund-karte leer"><span class="fragezeichen">?</span><b>???</b><small>kommt noch</small></div>`;
       }).join("")}</div>
@@ -593,7 +716,7 @@
       <div class="album">${L.STICKER.map((k) => `<span class="sticker${S.sticker[k] ? "" : " leer"}">${S.sticker[k] ? k : ""}${S.sticker[k] > 1 ? `<b>${S.sticker[k]}</b>` : ""}</span>`).join("")}</div></main>`;
   }
   function freundSeite() {
-    const f = freund(ui.freund), x = S.freunde[f.id];
+    const f = freund(ui.freund), x = f.id === "camille" ? S.fr && S.fr.camille : S.freunde[f.id];
     if (!x) return freundebuch();
     return `${kopf("Freundebuch", true)}<main class="freund-seite">
       <div class="freund-bild">${P.puppeSvg(f.look, { mood: "jubel" })}</div>
@@ -613,7 +736,8 @@
     const reiter = ui.reiter || "leckeres";
     const st = L.stufe(S.punkte), naechste = L.STUFEN[st + 1];
     let laden = "";
-    if (reiter === "frisur") {
+    if (reiter === "winter") laden = winterLaden();
+    else if (reiter === "frisur") {
       const e = S.puppe;
       laden = `<div class="frisier"><h3>Frisur</h3><div class="frisuren">${Object.keys(L.FRISUREN).map((f) => `<button class="frisur${f === e.frisur ? " aktiv" : ""}" data-act="s-frisur" data-arg="${f}">${P.kopfSvg(Object.assign({}, e, { frisur: f }))}<span>${L.FRISUREN[f]}</span></button>`).join("")}</div>
         <h3>Haarfarbe</h3>${farbKreise("s-haar", Object.keys(L.HAAR), e.haar, (w) => L.HAAR[w])}
@@ -631,12 +755,12 @@
     }
     return `${kopf(puppeName(), true)}<main class="stube-seite">
       <section class="zimmer-box gross${ui.mood ? " " + ui.mood : ""}" data-act="streicheln" aria-label="${esc(puppeName())} kitzeln">
-        ${P.zimmerSvg(S.puppe, { besitz: S.besitz, traegt: S.traegt, stufe: st, mood: ui.mood || "froh", essen: ui.essen })}
+        ${P.zimmerSvg(S.puppe, { besitz: S.besitz, traegt: S.traegt, winter: winter(), stufe: st, mood: ui.mood || "froh", essen: ui.essen })}
         ${ui.sagt ? `<div class="sprechblase">${esc(ui.sagt)}</div>` : ""}
         ${ui.mood === "jubel" ? `<div class="herzen" aria-hidden="true"><i>❤</i><i>❤</i><i>❤</i></div>` : ""}
       </section>
       <p class="leise mitte-text">${esc(L.STUFEN[st].name)}. ${naechste ? `Noch ${naechste.ab - S.punkte} Punkte, dann wird die Puppenstube noch schöner.` : "Schöner geht es nicht!"}</p>
-      <nav class="reiter">${[["leckeres", "🍓 Teeparty"], ["kleider", "👗 Kleider"], ["schmuck", "🎀 Schmuck"], ["moebel", "🛋️ Möbel"], ["frisur", "✂️ Frisieren"]].map(([id, n]) => `<button class="${reiter === id ? "aktiv" : ""}" data-act="stube-reiter" data-arg="${id}">${n}</button>`).join("")}</nav>
+      <nav class="reiter">${[["leckeres", "🍓 Teeparty"], ["kleider", "👗 Kleider"], ["winter", "❄️ Winter"], ["schmuck", "🎀 Schmuck"], ["moebel", "🛋️ Möbel"], ["frisur", "✂️ Frisieren"]].map(([id, n]) => `<button class="${reiter === id ? "aktiv" : ""}" data-act="stube-reiter" data-arg="${id}">${n}</button>`).join("")}</nav>
       ${laden}</main>`;
   }
   let moodTimer = null;
@@ -719,7 +843,10 @@
         ${wack.length ? `<ul class="wackel-liste">${wack.map((id) => `<li>${esc(skillName(id))} <span class="leise">(${esc(L.themaById(L.themaVon(id)).name)})</span></li>`).join("")}</ul>` : `<p class="leise">Gerade nichts. Prima!</p>`}
         <h2>Zeit der letzten 7 Tage</h2>
         <div class="tage-balken">${tage.map(([d, m, h]) => `<div><span class="ha" style="height:${Math.round((100 * h) / maxMin)}%"></span><span style="height:${Math.round((100 * m) / maxMin)}%"></span><b>${m + h}</b><small>${["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][new Date(d + "T12:00:00").getDay()]}</small></div>`).join("")}</div>
-        <p class="leise klein"><span class="legende-punkt"></span> Minuten Rechnen in der App · <span class="legende-punkt ha"></span> Minuten Hausaufgaben-Zeit. Tagesmissionen bisher: ${missionen}. Freundebuch: ${Object.keys(S.freunde).length} von ${L.FREUNDE.length}.</p>`;
+        <p class="leise klein"><span class="legende-punkt"></span> Minuten Rechnen in der App · <span class="legende-punkt ha"></span> Minuten Hausaufgaben-Zeit. Tagesmissionen bisher: ${missionen}. Freundebuch: ${Object.keys(S.freunde).length} von ${L.FREUNDE.length}.</p>
+        <h2>Französisch</h2>
+        ${FR.THEMEN.map((th) => { const b = FR.bereitschaft(S, th.id); return `<div class="ergebnis"><span>${esc(th.icon)} ${esc(th.de)}</span><span class="balken"><i style="width:${b}%"></i></span><b>${b} %</b></div>`; }).join("")}
+        <p class="leise klein">100 % heißt: jedes Wort wurde erkannt, gewusst und richtig mit Buchstaben gelegt. Noch unsicher: ${esc(FR.WOERTER.filter((w) => FR.stand(S, w.id).n > 0 && FR.stand(S, w.id).box <= 1).map(FR.zeige).join(", ") || "nichts")}.</p>`;
     } else if (reiter === "pfad") {
       inhalt = `<h2>Lernpfad</h2>
         <p class="leise klein">Die Themen öffnen sich nacheinander, sobald das vorige zu 60 % sitzt. Wenn die Schule schon weiter ist, können Sie Themen hier freischalten und den Schwerpunkt setzen. Die Tagesmission übt dann vor allem dieses Thema.</p>
@@ -794,6 +921,9 @@
       case "stube": h = stube(); break;
       case "ha": h = hausaufgaben(); break;
       case "eltern": h = eltern(); break;
+      case "franz": h = franzSeite(); break;
+      case "fr-karten": h = frKarten(); break;
+      case "franz-ende": h = franzEnde(); break;
       default: h = start();
     }
     if (ui.sicherFrage) h += `<div class="dialog-hinter"><div class="dialog" role="dialog" aria-label="Sicherung"><h2>Spielstand sichern?</h2><p>Die Sicherungsdatei kannst du in «Dateien» ablegen. Damit geht nichts verloren.</p><div class="knopfzeile"><button class="btn haupt" data-act="sicherung">Sicherung speichern</button><button class="btn" data-act="dialog-zu">Abbrechen</button></div></div></div>`;
@@ -874,7 +1004,42 @@
         return;
       }
       case "sag": sprich(arg); return;
-      case "vorlesen": vorlesen(); return;
+      case "vorlesen": if (R && R.task && R.task.fach === "fr") sprich(R.task.frage); else vorlesen(); return;
+      // Französisch
+      case "franz": gehe("franz"); return;
+      case "fr-training": return starteRunde("franz", FR.missionEtappen(), "Vokabel-Training");
+      case "fr-ueben": { const th = FR.THEMEN.find((x) => x.id === arg) || FR.THEMEN[0]; return starteRunde("franz", [{ titel: th.name, fach: "fr", thema: th.id, n: 8 }], th.name); }
+      case "fr-karten": gehe("fr-karten", { thema: arg }); return;
+      case "fr-karte": { const w = FR.wortById(arg); if (!w) return; clearTimeout(alleTimer); ui.spielt = arg; render(); sprichFr(FR.sprechText(w)); return; }
+      case "fr-alle": alleAnhoeren(FR.imThema(ui.thema), 0); return;
+      case "fr-sag": if (R && R.task) sprichFr(R.task.sprich || R.task.sprichNachher); return;
+      case "fr-sag-loesung": if (R && R.task) sprichFr(R.task.sprichNachher || R.task.sprich); return;
+      case "stube-winter": gehe("stube", { reiter: "winter" }); return;
+      case "winter": {
+        const w = FR.wortById(arg); if (!w) return;
+        sprichFr(FR.sprechText(w));
+        if (!S.fr.winter.includes(arg)) { puppeReagiert(null, `${FR.zeige(w)} heißt ${w.de}. Übe es bei Camille, dann darf ich es anziehen!`, 2800); return; }
+        const i = S.fr.traegt.indexOf(arg);
+        if (i >= 0) S.fr.traegt.splice(i, 1);
+        else { if (arg === "anorak") S.fr.traegt = S.fr.traegt.filter((x) => x !== "manteau"); if (arg === "manteau") S.fr.traegt = S.fr.traegt.filter((x) => x !== "anorak"); S.fr.traegt.push(arg); }
+        speichern(); puppeReagiert("jubel", i >= 0 ? "Wieder ausgezogen!" : `${FR.zeige(w)}! Schön warm!`, 1800); return;
+      }
+      case "kachel": {
+        if (!R || R.fertig || !R.task || R.task.art !== "buchstaben") return;
+        const i = Number(arg), c = R.task.kacheln[i];
+        if (R.benutzt.includes(i)) return;
+        zeitBuchen();
+        if (FR.naechsterOk(R.task, R.gelegt, c)) {
+          R.gelegt.push(c); R.benutzt.push(i); R.falschKachel = -1; R.meldung = null;
+          ton(3 + R.gelegt.length);
+          if (R.gelegt.length === Array.from(R.task.ziel).length) return aufgabeFertig();
+        } else {
+          R.fehler++; R.falschKachel = i;
+          if (R.fehler >= 3) { R.zeigeWort = true; R.geholfen = true; R.meldung = { art: "loesung", text: "Ich zeige dir das Wort ganz leise. Leg es jetzt nach.", tipp: R.task.tipp }; }
+          else R.meldung = { art: "tipp", text: pick(FAST), tipp: R.task.tipp };
+        }
+        render(); return;
+      }
       case "tipp-zeigen": if (R) { R.tippOffen = true; render(); } return;
       case "weiter": naechsteAufgabe(); return;
       // Antworten
@@ -997,6 +1162,7 @@
   window.__PS = {
     stand: () => S, ui: () => ui, aufgabe: () => (ui.runde ? ui.runde.task : null), version: VER, speichern,
     // nur für Bild-Tests: eine bestimmte Aufgabe anzeigen
+    zeigeFr: (spec) => { starteRunde("franz", [{ titel: "Test", fach: "fr", thema: FR.wortById(spec.wort).thema, n: 1 }], "Test"); bereiteEtappe(); ui.runde.specs = [Object.assign({ fach: "fr", stufe: 0, seed: 1 }, spec)]; naechsteAufgabe(); },
     zeige: (skill, stufe, seed) => { starteRunde("ueben", [{ titel: skillName(skill), art: "skill", skill }], skillName(skill)); S.gesehen[skill] = heute(); bereiteEtappe(); ui.runde.specs = [{ skill, stufe, seed, freund: ui.runde.freund }]; naechsteAufgabe(); },
   };
   render();
