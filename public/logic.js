@@ -151,6 +151,7 @@
       hilfe, tipp: tippGanz, merk: ctx.merk, erklaerung,
     });
   }
+  const tippTeil = (b, t, name) => `Nimm von ${b} jetzt die ${name}. Schreib sie als ganze Zahl, zum Beispiel ${t >= 100 ? "300" : t >= 10 ? "40" : "5"}.`;
   // a − b in Schritten: Hunderter weg, Zehner weg, Einer weg (Teile ohne Nullen)
   function schrittAufgabe(r, st, a, b, ctx) {
     const teile = zerlege(b);
@@ -168,16 +169,30 @@
         zeilen.push(zeile([k === 0 ? a : Zg(zw[k - 1], k - 1), M, t, "=", F(k)], labels[k]));
         felder.push({ loesung: zw[k], tipp: tippSchritt(vor(k), t), hilfe: hilfeSchritt(vor(k), t) });
       });
-    } else {
+    } else if (st === 1) {
       zeilen.push(zeile([a, M, b, "=", Zg(res, 2 * n - 1)]));
       teile.forEach((t, k) => {
         zeilen.push(zeile([k === 0 ? a : Zg(zw[k - 1], 2 * k - 1), M, F(2 * k), "=", F(2 * k + 1)], labels[k]));
-        felder.push({ loesung: t, tipp: `Nimm von ${b} jetzt die ${namen[k]}. Schreib sie als ganze Zahl, zum Beispiel ${t >= 100 ? "300" : t >= 10 ? "40" : "5"}.` });
+        felder.push({ loesung: t, tipp: tippTeil(b, t, namen[k]) });
         felder.push({ loesung: zw[k], tipp: tippSchritt(vor(k), t), hilfe: hilfeSchritt(vor(k), t) });
       });
+    } else {
+      // Schulformat wie im Heft: der ganze Rechenweg, auch die Zahl vorne in jeder Zeile
+      let i = 0; const reihe = [];
+      teile.forEach((t, k) => {
+        const teil = [];
+        if (k > 0) { teil.push(F(i++)); felder.push({ loesung: zw[k - 1], tipp: `Vorne steht immer das Ergebnis der Zeile darüber: ${zw[k - 1]}.` }); }
+        else teil.push(a);
+        teil.push(M, F(i++)); felder.push({ loesung: t, tipp: tippTeil(b, t, namen[k]) });
+        teil.push("=", F(i++)); felder.push({ loesung: zw[k], tipp: tippSchritt(vor(k), t), hilfe: hilfeSchritt(vor(k), t) });
+        reihe.push(zeile(teil, labels[k]));
+      });
+      zeilen.push(zeile([a, M, b, "=", Zg(res, i - 1)]));
+      zeilen.push(...reihe);
     }
+    const schritteWort = n === 3 ? "drei" : "zwei";
     return aufgabe({
-      layout: "schritte", frage: g ? "Rechengeschichte: rechne in Schritten." : st === 0 ? "Rechne in Schritten." : "Zerlege und rechne in Schritten.",
+      layout: "schritte", frage: g ? "Rechengeschichte: rechne in Schritten." : st === 0 ? "Rechne in Schritten." : st === 1 ? "Zerlege und rechne in Schritten." : `Rechne in ${schritteWort} Schritten. Schreib den ganzen Rechenweg auf.`,
       text: g ? g.text : "", zeilen, felder,
       hilfe: sprung(a, teile, "start"),
       tipp: `Zerlege ${b} in ${teile.join(", ")}. Nimm erst die ${namen[0]} weg, dann ${namen.slice(1).join(", dann ")}.`,
@@ -463,9 +478,9 @@
   const THEMEN = [
     { id: "zahlen", name: "Zahlen bis 1000", icon: "🧱", buch: "Stellenwerte, Nachbarzehner, Zahlenstrahl, Vergleichen", skills: ["stellen", "nachbar", "vergleich", "strahl"] },
     { id: "weg", name: "Hunderter, Zehner, Einer weg", icon: "🧺", buch: "Buch S. 28 und 29", skills: ["h-weg", "z-weg", "e-weg", "bis-zehner"] },
+    { id: "schritte", name: "In Schritten rechnen", icon: "👣", buch: "Buch S. 32 und 33, Arbeitsblatt «Subtraktion ohne Übertrag»", skills: ["schritte-3", "schritte-2"] },
     { id: "zehner", name: "Über den Zehner", icon: "🪜", buch: "Buch S. 36 und 37", skills: ["nachbar-aufg", "e-ueber", "aehnlich-e", "e-ueber-h"] },
     { id: "hunderter", name: "Über den Hunderter", icon: "🏰", buch: "Buch S. 36 und 37", skills: ["z-ueber", "aehnlich-z", "raupe"] },
-    { id: "schritte", name: "In Schritten rechnen", icon: "👣", buch: "Buch S. 32 und 33", skills: ["schritte-3", "schritte-2"] },
     { id: "uebergang", name: "Schritte mit Übergang", icon: "⭐", buch: "Buch S. 39", skills: ["schritte-ue2", "schritte-ue"] },
     { id: "kurz", name: "Kurz geschrieben", icon: "✍️", buch: "Buch S. 41", skills: ["kurz"] },
   ];
@@ -579,17 +594,22 @@
       s.sticker[id] = (s.sticker[id] || 0) + 1;
       return { typ: "sticker", id, neu: s.sticker[id] === 1 };
     }
-    const n = x < 0.9 ? r.int(3, 6) : 10;
+    const n = x < 0.9 ? r.int(2, 4) : 6;
     s.muenzen += n;
     return { typ: "steine", n };
   }
   const STUFEN = [{ ab: 0, name: "Kleines Puppenhaus" }, { ab: 300, name: "Puppenhaus mit Blumen" }, { ab: 1000, name: "Puppenhaus mit Regenbogen" }, { ab: 2500, name: "Glitzer-Puppenhaus" }];
   const stufe = (punkte) => { let i = 0; STUFEN.forEach((x, j) => { if (punkte >= x.ab) i = j; }); return i; };
-  const LOHN = { richtig: 2, spaeter: 1, etappe: 5, mission: 10, kette: 3, punkteRichtig: 10, punkteSpaeter: 5 };
-  const HA_LOHN = (min) => (min >= 15 ? 12 : min >= 10 ? 8 : min >= 5 ? 5 : min >= 3 ? 3 : 0);
+  // Edelsteine gibt es nicht zu schnell: 1 für eine Aufgabe auf Anhieb, 1 extra für eine Profi-Aufgabe beim Minusrechnen
+  const LOHN = { richtig: 1, spaeter: 0, profi: 1, etappe: 3, mission: 6, kette: 2, medaille: 8, punkteRichtig: 5, punkteSpaeter: 2 };
+  const HA_LOHN = (min) => (min >= 15 ? 8 : min >= 10 ? 5 : min >= 5 ? 3 : 0);
+  // Profi-Aufgabe: Minus in Schritten oder mit Übergang, selbst zerlegt (Stufe 1 und 2)
+  const PROFI_THEMEN = ["schritte", "zehner", "hunderter", "uebergang", "kurz"];
+  const istProfi = (t) => !!t && t.fach !== "fr" && t.stufe >= 1 && PROFI_THEMEN.includes(t.thema);
 
   // ---------- Spielstand ----------
   const STAND_V = 1;
+  const SCHULSTAND = "schritte"; // Arbeitsblatt vom 20.11.2026: «Subtraktion ohne Übertrag, rechne in drei Schritten»
   const HAUT = ["#fde3cc", "#f6cba6", "#e0a77c", "#b77a4f", "#7e4e31"];
   const HAAR = { blond: "#f0c75e", braun: "#8a5a2b", dunkel: "#4a2f1e", schwarz: "#2b2626", rot: "#c9572e", rosa: "#f39cc3", lila: "#a57ad6" };
   const FRISUREN = { zoepfe: "Zöpfe", pferdeschwanz: "Pferdeschwanz", lang: "Lange Haare", bob: "Bob", locken: "Locken", dutt: "Dutt", kurz: "Kurz" };
@@ -604,8 +624,10 @@
       fortschritt: {}, // skill -> { box, sterne, n, ok, reihe, last }
       fehler: [], // skills in der Übe-Kiste
       gesehen: {}, // skill -> Datum, an dem die Erklärung gezeigt wurde
-      offen: ["zahlen", "weg"], // freigeschaltete Themen
+      offen: ["zahlen", "weg", "schritte"], // freigeschaltete Themen
       fokus: null, // Schwerpunkt-Thema, von den Eltern gesetzt
+      schule: SCHULSTAND, // so weit ist die Klasse; alles bis hier ist offen
+      medaillen: {}, // Thema -> Datum, an dem es zu 100 % saß
       tage: {}, // Datum -> { sek, aufgaben, richtig, etappen, mission, haSek }
       besuch: null, // { datum, freund }
       freunde: {}, // freundId -> { ab, herzen }
@@ -648,6 +670,9 @@
     if (Array.isArray(raw.offen)) s.offen = ["zahlen"].concat(raw.offen.filter((id) => typeof id === "string" && themaById(id)));
     s.offen = THEMEN.map((t) => t.id).filter((id) => s.offen.includes(id));
     if (typeof raw.fokus === "string" && themaById(raw.fokus)) s.fokus = raw.fokus;
+    if (typeof raw.schule === "string" && themaById(raw.schule)) s.schule = raw.schule;
+    bisSchuleOffen(s);
+    if (istObj(raw.medaillen)) for (const id of Object.keys(raw.medaillen)) if (themaById(id) && gueltigesDatum(raw.medaillen[id])) s.medaillen[id] = raw.medaillen[id];
     if (istObj(raw.tage)) for (const t of Object.keys(raw.tage)) {
       const x = raw.tage[t]; if (!gueltigesDatum(t) || !istObj(x)) continue;
       s.tage[t] = { sek: zahl(x.sek, 0, 0), aufgaben: Math.floor(zahl(x.aufgaben, 0, 0)), richtig: Math.floor(zahl(x.richtig, 0, 0)), etappen: Math.floor(zahl(x.etappen, 0, 0)), mission: !!x.mission, haSek: zahl(x.haSek, 0, 0), perlen: Math.floor(zahl(x.perlen, 0, 0)) };
@@ -695,8 +720,21 @@
     return Math.round((100 * sumB) / th.skills.length);
   }
   const wackelt = (s) => ALLE_SKILLS.filter((id) => s.fehler.includes(id) || (teilStand(s, id).n > 0 && teilStand(s, id).box <= 1));
+  // Alles bis zum Schulstand ist offen: das hatte die Klasse schon
+  function bisSchuleOffen(s) {
+    const bis = THEMEN.findIndex((t) => t.id === s.schule);
+    THEMEN.forEach((t, i) => { if (i <= bis && !s.offen.includes(t.id)) s.offen.push(t.id); });
+    s.offen = THEMEN.map((t) => t.id).filter((id) => s.offen.includes(id));
+  }
+  // Medaille, wenn ein Thema zu 100 % sitzt. Gibt die neuen Medaillen zurück.
+  function neueMedaillen(s, heute) {
+    const neu = [];
+    for (const th of THEMEN) if (s.offen.includes(th.id) && !s.medaillen[th.id] && bereitschaft(s, th.id) >= 100) { s.medaillen[th.id] = heute; neu.push(th.id); }
+    return neu;
+  }
   // Nächstes Thema freischalten, wenn das vorige zu 60 % sitzt. Gibt die neu freigeschalteten Themen zurück.
   function aktualisiereOffen(s) {
+    bisSchuleOffen(s);
     const neu = [];
     THEMEN.forEach((t, i) => {
       if (s.offen.includes(t.id)) return;
@@ -706,10 +744,12 @@
     s.offen = THEMEN.map((t) => t.id).filter((id) => s.offen.includes(id));
     return neu;
   }
+  // Schwerpunkt: von den Eltern gesetzt, sonst das erste offene Thema ab dem Schulstand, das noch nicht sitzt
   function fokus(s) {
     if (s.fokus && s.offen.includes(s.fokus)) return s.fokus;
     const offen = THEMEN.filter((t) => s.offen.includes(t.id));
-    const t = offen.find((x) => bereitschaft(s, x.id) < 70);
+    const ab = Math.max(0, THEMEN.findIndex((t) => t.id === s.schule));
+    const t = offen.find((x) => THEMEN.indexOf(x) >= ab && bereitschaft(s, x.id) < 70) || offen.find((x) => bereitschaft(s, x.id) < 70);
     return (t || offen[offen.length - 1] || THEMEN[0]).id;
   }
   function aktuellerSkill(s, themaId) {
@@ -807,7 +847,7 @@
     GEN, THEMEN, SKILL_NAMEN, ALLE_SKILLS, themaVon, themaById, makeTask, checkFeld, checkWahl, tippSchritt, kreuztSchritt,
     FREUNDE, freundById, GESCHICHTEN, geschichte,
     heuteISO, tageBis, plusTage, gueltigesDatum,
-    SHOP, shopDing, kaufe, STICKER, ueberraschung, STUFEN, stufe, LOHN, HA_LOHN,
+    SHOP, shopDing, kaufe, STICKER, ueberraschung, STUFEN, stufe, LOHN, HA_LOHN, PROFI_THEMEN, istProfi, SCHULSTAND, neueMedaillen,
     HAUT, HAAR, FRISUREN, FARBEN,
     defaults, migrate, record, teilStand, bereitschaft, wackelt, sterneFuer, aktualisiereOffen, fokus, aktuellerSkill, stufeFuer,
     buildEtappe, missionEtappen, besuchFuer, freundDanke,
