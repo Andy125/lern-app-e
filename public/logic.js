@@ -605,7 +605,7 @@
   const HA_LOHN = (min) => (min >= 15 ? 8 : min >= 10 ? 5 : min >= 5 ? 3 : 0);
   // Profi-Aufgabe: Minus in Schritten oder mit Übergang, selbst zerlegt (Stufe 1 und 2)
   const PROFI_THEMEN = ["schritte", "zehner", "hunderter", "uebergang", "kurz"];
-  const istProfi = (t) => !!t && t.fach !== "fr" && t.stufe >= 1 && PROFI_THEMEN.includes(t.thema);
+  const istProfi = (t) => !!t && !t.fach && t.stufe >= 1 && PROFI_THEMEN.includes(t.thema);
 
   // ---------- Spielstand ----------
   const STAND_V = 1;

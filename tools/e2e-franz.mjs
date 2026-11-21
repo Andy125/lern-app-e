@@ -88,7 +88,7 @@ await p.waitForTimeout(400);
 await p.reload();
 s = await S();
 P.ok(s.fr.runden === 1 && s.fr.winter.length >= 1, "Nach dem Neuladen ist Französisch noch da");
-const k = await p.$("#eltern-knopf"); const bb = await k.boundingBox();
+const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
 await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down(); await p.waitForTimeout(1700); await p.mouse.up();
 P.ok((await p.textContent(".eltern")).includes("Französisch"), "Eltern-Übersicht zeigt Französisch");
 // Einzelnes Thema üben: 8 Aufgaben

@@ -466,3 +466,102 @@ body.ruhig *, body.ruhig *::before, body.ruhig *::after { animation: none !impor
 .medaille-zeile { background: #fff4d4; border-radius: 12px; padding: 8px 12px; font-weight: 700; font-size: 20px; }
 .station.medaille .station-nr { background: #fff1c2; box-shadow: 0 0 0 3px #f2c94c; }
 .schule-marke { color: var(--haupt); font-weight: 700; }
+
+/* ===== Deutsch mit Liese: Wörter mit ie ===== */
+.deutsch-karte { border-color: #fbe3a0; }
+.deutsch-training { border-color: #fbe3a0; }
+.ie { color: #c2306f; background: #ffe3ef; border-radius: 6px; padding: 0 1px; }
+.de-mark { font-weight: 800; }
+.richtig .ie, .rueck .ie, .luecke.voll .ie { animation: ie-hops .5s ease; display: inline-block; }
+@keyframes ie-hops { 0% { transform: scale(1); } 40% { transform: scale(1.35) rotate(-4deg); } 100% { transform: scale(1); } }
+.de-bild { font-size: 54px; line-height: 1.1; display: inline-block; white-space: nowrap; }
+.de-bild.gross { font-size: 104px; }
+.de-wort { font-size: 42px; font-weight: 800; letter-spacing: .02em; text-align: center; line-height: 1.3; }
+.de-wort .vorne { font-size: 34px; margin-right: 10px; }
+.de-wort .vorlesen { vertical-align: middle; margin-left: 12px; }
+.de-satz { font-size: 26px; line-height: 1.6; margin: 0; background: var(--bg); border-radius: 14px; padding: 12px 18px; max-width: 640px; }
+.de-im-satz { font-weight: 800; white-space: nowrap; }
+.luecke { display: inline-grid; place-items: center; min-width: 1.6em; height: 1.25em; padding: 0 4px; margin: 0 2px; border: 3px dashed #cdb6dc; border-radius: 10px; background: #fbf8fd; color: #b8a5c4; vertical-align: middle; line-height: 1; }
+.luecke.voll { border: 3px solid var(--gut); background: var(--gut-hell); color: var(--text); }
+.satz-luecke { display: inline-block; min-width: 4em; border-bottom: 3px solid #cdb6dc; text-align: center; font-weight: 800; }
+.optionen.worte .option { font-size: 30px; }
+.optionen.de-bilder { grid-template-columns: repeat(3, 1fr); }
+.option.bild-option { gap: 2px; }
+.option.bild-option .de-bild { font-size: 70px; }
+.option.bild-option small { font-size: 18px; color: var(--leise); }
+.option.wort-option { font-weight: 800; }
+.silben-bau { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; font-size: 34px; }
+.silben-bau > b { color: var(--leise); }
+.silbe-stein { min-width: 110px; padding: 10px 18px; border-radius: 18px; background: #fff8e8; border: 3px solid #f1d98c; font-size: 40px; font-weight: 800; box-shadow: 0 4px 0 #ecd9b5; }
+.silbe-stein.leer { background: #fbf8fd; border: 3px dashed #cdb6dc; color: #c9b8cf; box-shadow: none; }
+.silbe-stein.voll { border-color: var(--gut); background: var(--gut-hell); }
+.buchst.ie-kachel { width: 96px; background: #ffe3ef; border-color: #f5a9c9; color: #c2306f; box-shadow: 0 3px 0 #f0b6cf; }
+.slot.ie-slot { width: 84px; }
+.slot.ie-an { background: #ffe3ef; color: #c2306f; border-bottom-color: #e0609a; position: relative; }
+.slot.ie-herz::after { content: "❤"; position: absolute; top: -16px; left: -9px; font-size: 18px; color: #e8605a; animation: auf .3s ease; }
+.slot.ie-slot.ie-herz::after { left: 50%; margin-left: -8px; }
+.de-erkl .de-mark { font-size: 1.1em; }
+.wiese-hinweis { display: flex; align-items: center; gap: 10px; background: #f0f9e8; border-radius: 12px; padding: 6px 12px; }
+.wiese-hinweis .de-bild { font-size: 40px; flex: none; }
+.wiese-hinweis.glitzer { background: #fff6d6; }
+.merk-karte { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; border: 3px solid #fbe3a0; }
+.merk-karte h2 { margin: 0 0 4px; }
+.merk-paar { flex: none; }
+.merk-text { flex: 1; min-width: 240px; }
+.ie-paar { width: 150px; height: 112px; display: block; }
+.ie-paar.gross { width: 300px; height: 225px; max-width: 100%; }
+.merkspruch { font-size: 22px; margin: 0 0 6px; }
+.wiese-knopf { display: flex; align-items: center; gap: 14px; text-align: left; border: 3px solid #cdeab9; background: #f3fbec; width: 100%; }
+.wiese-knopf b { display: block; font-size: 20px; }
+.wiese-knopf small { color: var(--leise); font-size: 16px; }
+.wiese-knopf-bild { font-size: 36px; flex: none; }
+.wortkarten.paare { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.wortkarte.paar b { font-size: 23px; }
+.wortkarte .de-bild { font-size: 46px; }
+.wortkarte .de-bild.gross { font-size: 64px; }
+.silbenboegen { display: flex; gap: 2px; justify-content: center; }
+.silbenboegen span { padding: 0 3px 6px; border-bottom: 3px solid #a983e0; border-radius: 0 0 50% 50% / 0 0 14px 14px; }
+.regel-bild { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.regel-bild.zeile { flex-direction: row; justify-content: center; flex-wrap: wrap; }
+.dehn-wort { font-size: 44px; font-weight: 800; }
+.gummi { color: #c2306f; letter-spacing: .12em; text-decoration: underline wavy #e0609a; text-underline-offset: 8px; display: inline-block; animation: gummi 1.6s ease-in-out infinite; }
+@keyframes gummi { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.25); } }
+.kurz-i { color: #2d4f9e; background: #e5f0fb; border-radius: 6px; padding: 0 2px; }
+.de-wort.reihe .nr { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; }
+.de-wort.reihe .nr small { font-size: 16px; color: var(--leise); margin-top: 4px; }
+.optionen.regel-wahl { grid-template-columns: repeat(2, minmax(100px, 160px)); justify-content: center; }
+.wiese-neu .de-bild { font-style: normal; font-size: 46px; }
+/* Die Wiese */
+.wiese { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: var(--r); overflow: hidden; box-shadow: var(--schatten); background: linear-gradient(#bfe4ff 0%, #e4f4ff 34%, #a6dd84 34.2%, #7cc760 100%); margin-bottom: 8px; }
+.wiese-huegel { position: absolute; left: -10%; right: -10%; top: 30%; height: 16%; background: #b4e494; border-radius: 50% 50% 0 0; }
+.wiese-sonne { position: absolute; right: 4%; top: 4%; width: 11%; aspect-ratio: 1; border-radius: 50%; background: #ffd84a; box-shadow: 0 0 0 8px rgba(255, 216, 74, .35); }
+.wiese-puppe { position: absolute; left: 1%; bottom: 2%; width: 24%; }
+.wiese-puppe svg { width: 100%; height: auto; display: block; }
+.wiese-ding { position: absolute; transform: translate(-50%, -50%); border: 0; background: none; padding: 2px; font-size: clamp(24px, 4.6vw, 44px); line-height: 1; min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+.wiese-ding.keim { font-size: clamp(16px, 2.6vw, 24px); opacity: .7; }
+.wiese-ding.blueht { animation: auf .4s ease; filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .15)); }
+.wiese-ding.glitzer::after { content: "✨"; position: absolute; top: -4px; right: -8px; font-size: .5em; }
+.wiese-ding.an { background: rgba(255, 255, 255, .7); border-radius: 50%; box-shadow: 0 0 0 3px #fff; }
+.wiese-blase { position: absolute; top: 3%; left: 50%; transform: translateX(-50%); width: min(92%, 460px); background: #fff; border-radius: 16px; padding: 8px 14px; box-shadow: var(--schatten); text-align: center; display: flex; flex-direction: column; gap: 2px; z-index: 2; }
+.wiese-blase b { font-size: 28px; }
+.wiese-blase small { font-size: 17px; color: var(--leise); }
+@media (max-width: 700px) {
+  .de-wort { font-size: 34px; }
+  .de-bild.gross { font-size: 84px; }
+  .de-satz { font-size: 21px; padding: 10px 12px; }
+  .optionen.worte { grid-template-columns: 1fr; }
+  .optionen.worte .option { font-size: 26px; min-height: 58px; }
+  .option.bild-option .de-bild { font-size: 54px; }
+  .silbe-stein { min-width: 84px; font-size: 32px; padding: 8px 12px; }
+  .buchst.ie-kachel { width: 80px; }
+  .slot.ie-slot { width: 62px; }
+  .ie-paar.gross { width: 240px; height: 180px; }
+  .wiese { aspect-ratio: 3 / 4; }
+  .wiese-puppe { width: 30%; }
+}
+@media (max-width: 480px) {
+  .slots { gap: 4px; }
+  .slot { width: 30px; }
+  .optionen.de-bilder { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .option.bild-option { min-height: 96px; padding: 4px; }
+}

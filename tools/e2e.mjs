@@ -142,7 +142,7 @@ await p.click("[data-act=heim]");
 // Eltern-Übersicht über langen Druck
 await p.click("#eltern-knopf");
 P.ok((await ansicht()) === "start", "Kurzes Tippen öffnet die Eltern-Übersicht nicht");
-const k = await p.$("#eltern-knopf"); const bb = await k.boundingBox();
+const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
 await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down(); await p.waitForTimeout(300); await p.mouse.up();
 P.ok((await ansicht()) === "eltern", "Langer Druck öffnet die Eltern-Übersicht");
 await p.click("[data-act=eltern-reiter][data-arg=pfad]");

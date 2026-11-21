@@ -42,7 +42,7 @@ const datei = "/tmp/puppenstube-test-sicherung.json";
 await writeFile(datei, JSON.stringify({ app: "puppenstube", version: 1, stand: Object.assign({}, STAND, { name: "Mia", muenzen: 123 }) }));
 // Eltern-Übersicht über langen Druck, dann Reiter Sicherung
 async function zurSicherung() {
-  const k = await p.$("#eltern-knopf"); const bb = await k.boundingBox();
+  const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
   await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down(); await p.waitForTimeout(1700); await p.mouse.up();
   await p.click("[data-act=eltern-reiter][data-arg=sicherung]");
 }

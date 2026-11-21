@@ -289,5 +289,20 @@
   // ---------- App-Symbol (Kopf der Puppe) ----------
   const iconSvg = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" fill="#fde7ef"/><g transform="translate(-4 4) scale(1.0)">${puppeSvg({ haut: 1, haar: "braun", frisur: "zoepfe", kleid: "kleid", farbe: "lila" }, { mood: "froh", traegt: ["schleife"], nurInhalt: true })}</g></svg>`;
 
-  root.PS_PUPPE = { kleidBild, WINTER_FARBEN: WF, puppeSvg, kopfSvg, zimmerSvg, bloeckeSvg, sprungSvg, strahlSvg, iconSvg, KLEIDER: Object.keys(KLEIDER), SCHMUCK: Object.keys(SCHMUCK), MOEBEL: Object.keys(MOEBEL), heller };
+  // ---------- Deutsch: i und e halten sich an der Hand ----------
+  const iePaarSvg = (klasse) => `<svg class="ie-paar${klasse ? " " + klasse : ""}" viewBox="0 0 200 150" role="img" aria-label="i und e halten sich an der Hand">
+    <path d="M72 88 Q90 104 109 97" stroke="#7d4fb8" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="90" cy="99" r="5.5" fill="#7d4fb8"/>
+    <path d="M91 76 C79 67 82 55 91 61 C100 55 103 67 91 76 Z" fill="#e8605a"/>
+    <rect x="48" y="62" width="24" height="68" rx="12" fill="#f58fb7"/>
+    <circle cx="60" cy="34" r="19" fill="#f58fb7"/>
+    <path d="M60 15 l-11 -7 v14 Z M60 15 l11 -7 v14 Z" fill="#f6c445"/><circle cx="60" cy="15" r="3.5" fill="#f39a4b"/>
+    <circle cx="53" cy="32" r="2.8" fill="#33283a"/><circle cx="67" cy="32" r="2.8" fill="#33283a"/>
+    <path d="M53 40 Q60 46 67 40" stroke="#33283a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M108 92 H168 A30 30 0 1 0 159.2 113.2" stroke="#a983e0" stroke-width="17" fill="none" stroke-linecap="round"/>
+    <circle cx="130" cy="77" r="2.6" fill="#33283a"/><circle cx="146" cy="77" r="2.6" fill="#33283a"/>
+    <path d="M129 106 Q137 111 145 106" stroke="#33283a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+
+  root.PS_PUPPE = { kleidBild, WINTER_FARBEN: WF, puppeSvg, kopfSvg, zimmerSvg, bloeckeSvg, sprungSvg, strahlSvg, iconSvg, iePaarSvg, KLEIDER: Object.keys(KLEIDER), SCHMUCK: Object.keys(SCHMUCK), MOEBEL: Object.keys(MOEBEL), heller };
 })(typeof window !== "undefined" ? window : globalThis);
