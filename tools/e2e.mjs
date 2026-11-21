@@ -1,6 +1,6 @@
 // Ablauf wie ein Kind: Willkommen, Puppe gestalten, Tagesmission mit Erklärungen, Geschenk, Pause, Freundebuch,
 // Puppenstube, Lernpfad, Hausaufgaben-Zeit, Eltern-Übersicht und Sicherung.
-import { server, browser, pruefer, loese } from "./hilfe.mjs";
+import { server, browser, pruefer, loese, elternOeffnen } from "./hilfe.mjs";
 const P = pruefer();
 const srv = await server(); const b = await browser();
 const ctx = await b.newContext({ viewport: { width: 820, height: 1180 }, acceptDownloads: true });
@@ -142,8 +142,7 @@ await p.click("[data-act=heim]");
 // Eltern-Übersicht über langen Druck
 await p.click("#eltern-knopf");
 P.ok((await ansicht()) === "start", "Kurzes Tippen öffnet die Eltern-Übersicht nicht");
-const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
-await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down(); await p.waitForTimeout(300); await p.mouse.up();
+await elternOeffnen(p);
 P.ok((await ansicht()) === "eltern", "Langer Druck öffnet die Eltern-Übersicht");
 await p.click("[data-act=eltern-reiter][data-arg=pfad]");
 P.ok(!(await p.$("input[data-change=offen][value=schritte]")), "Bis zum Schulstand ist alles offen");

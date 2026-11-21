@@ -1,5 +1,5 @@
 // Spielstand nie verlieren: Neuladen, kaputter Hauptspeicher, gelöschter Browser-Speicher, Sicherungsdatei.
-import { server, browser, pruefer, loese, STAND } from "./hilfe.mjs";
+import { server, browser, pruefer, loese, STAND, elternOeffnen } from "./hilfe.mjs";
 import { writeFile } from "fs/promises";
 const P = pruefer();
 const srv = await server(); const b = await browser();
@@ -42,8 +42,7 @@ const datei = "/tmp/puppenstube-test-sicherung.json";
 await writeFile(datei, JSON.stringify({ app: "puppenstube", version: 1, stand: Object.assign({}, STAND, { name: "Mia", muenzen: 123 }) }));
 // Eltern-Übersicht über langen Druck, dann Reiter Sicherung
 async function zurSicherung() {
-  const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
-  await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down(); await p.waitForTimeout(1700); await p.mouse.up();
+  await elternOeffnen(p);
   await p.click("[data-act=eltern-reiter][data-arg=sicherung]");
 }
 await zurSicherung();

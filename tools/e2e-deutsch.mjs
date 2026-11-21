@@ -1,5 +1,5 @@
 // Deutsch wie ein Kind: Liese, Erklärung zum langen i, ie-Training mit 3 Etappen, Wiese, Puppen-Diktat, Freundebuch.
-import { server, browser, pruefer, loese, STAND } from "./hilfe.mjs";
+import { server, browser, pruefer, loese, STAND, elternOeffnen } from "./hilfe.mjs";
 const P = pruefer();
 const srv = await server(); const b = await browser();
 const p = await (await b.newContext({ viewport: { width: 820, height: 1180 } })).newPage();
@@ -124,8 +124,7 @@ await p.reload();
 s = await S();
 P.ok(s.de.runden === 2 && s.de.glitzer.length >= 6 && s.de.regel === true, "Nach dem Neuladen ist Deutsch noch da");
 P.ok((await p.textContent(".deutsch-karte")).includes("blühen auf deiner Wiese"), "Startseite zeigt die Wiese");
-const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
-await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down(); await p.waitForTimeout(1700); await p.mouse.up();
+await elternOeffnen(p);
 P.ok((await p.textContent(".eltern")).includes("Deutsch: Wörter mit ie"), "Eltern-Übersicht zeigt Deutsch");
 
 P.ok(fehler.length === 0, "Fehler im Browser: " + fehler.join(" | "));

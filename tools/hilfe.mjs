@@ -47,3 +47,11 @@ export async function loese(p, falsch) {
   }
   return t;
 }
+
+// Eltern-Übersicht wie ein Erwachsener öffnen: Knopf gedrückt halten, bis die Übersicht da ist (höchstens 5 Sekunden)
+export async function elternOeffnen(p) {
+  const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
+  await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down();
+  await p.waitForFunction(() => window.__PS.ui().ansicht === "eltern", null, { timeout: 5000 }).catch(() => {});
+  await p.mouse.up();
+}

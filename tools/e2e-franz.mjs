@@ -1,5 +1,5 @@
 // Französisch wie ein Kind: Camille, Wortkarten, Vokabel-Training mit 3 Etappen, Winterkleider anziehen, Freundebuch.
-import { server, browser, pruefer, loese, STAND } from "./hilfe.mjs";
+import { server, browser, pruefer, loese, STAND, elternOeffnen } from "./hilfe.mjs";
 const P = pruefer();
 const srv = await server(); const b = await browser();
 const p = await (await b.newContext({ viewport: { width: 820, height: 1180 } })).newPage();
@@ -88,8 +88,7 @@ await p.waitForTimeout(400);
 await p.reload();
 s = await S();
 P.ok(s.fr.runden === 1 && s.fr.winter.length >= 1, "Nach dem Neuladen ist Französisch noch da");
-const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
-await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down(); await p.waitForTimeout(1700); await p.mouse.up();
+await elternOeffnen(p);
 P.ok((await p.textContent(".eltern")).includes("Französisch"), "Eltern-Übersicht zeigt Französisch");
 // Einzelnes Thema üben: 8 Aufgaben
 await p.click("[data-act=heim]"); await p.click("[data-act=franz]"); await p.click("[data-act=fr-ueben][data-arg=zahlen]"); await p.click("[data-act=etappe-los]");
