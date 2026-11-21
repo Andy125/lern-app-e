@@ -326,7 +326,7 @@ table.plan small { display: block; padding-left: 36px; }
 .schalter input { width: 26px; height: 26px; flex: none; }
 
 /* Rückmeldungen */
-.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #33283a; color: #fff; padding: 12px 20px; border-radius: 14px; font-size: 18px; z-index: 50; transition: opacity .4s; max-width: 90vw; text-align: center; }
+.toast { pointer-events: none; position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #33283a; color: #fff; padding: 12px 20px; border-radius: 14px; font-size: 18px; z-index: 50; transition: opacity .4s; max-width: 90vw; text-align: center; }
 .toast.weg { opacity: 0; }
 .konfetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
 .konfetti i { position: absolute; top: -20px; width: 10px; height: 16px; border-radius: 3px; animation: fall 2.2s ease-in forwards; }

@@ -142,6 +142,7 @@ await p.click("[data-act=heim]");
 // Eltern-Übersicht über langen Druck
 await p.click("#eltern-knopf");
 P.ok((await ansicht()) === "start", "Kurzes Tippen öffnet die Eltern-Übersicht nicht");
+P.ok(await p.evaluate(() => { const t = document.querySelector(".toast"); return !!t && getComputedStyle(t).pointerEvents === "none"; }), "Der Hinweis unten fängt keine Berührung ab (er liegt sonst über dem Knopf)");
 await elternOeffnen(p);
 P.ok((await ansicht()) === "eltern", "Langer Druck öffnet die Eltern-Übersicht");
 await p.click("[data-act=eltern-reiter][data-arg=pfad]");
