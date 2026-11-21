@@ -27,9 +27,10 @@ export function pruefer() {
 export async function loese(p, falsch) {
   const t = await p.evaluate(() => window.__PS.aufgabe());
   if (t.art === "buchstaben") {
-    if (falsch) { const i = t.kacheln.findIndex((c) => c !== Array.from(t.ziel)[0]); await p.click(`[data-act=kachel][data-arg="${i}"]`); }
+    const teile = t.einheiten || Array.from(t.ziel); // Deutsch: auf Stufe 0 ist «ie» ein Baustein
+    if (falsch) { const i = t.kacheln.findIndex((c) => c !== teile[0]); await p.click(`[data-act=kachel][data-arg="${i}"]`); }
     const benutzt = new Set();
-    for (const c of Array.from(t.ziel)) { const i = t.kacheln.findIndex((k, j) => k === c && !benutzt.has(j)); benutzt.add(i); await p.click(`[data-act=kachel][data-arg="${i}"]`); }
+    for (const c of teile) { const i = t.kacheln.findIndex((k, j) => k === c && !benutzt.has(j)); benutzt.add(i); await p.click(`[data-act=kachel][data-arg="${i}"]`); }
     return t;
   }
   if (t.art === "wahl") {
@@ -45,4 +46,15 @@ export async function loese(p, falsch) {
     await p.click("[data-act=taste][data-arg=ok]");
   }
   return t;
+}
+
+// Eltern-Übersicht wie ein Erwachsener öffnen: Knopf gedrückt halten, bis die Übersicht da ist (höchstens 5 Sekunden)
+export async function elternOeffnen(p) {
+  // In die Mitte holen: steht der Knopf am Rand, rückt die Seite beim Drücken nach und der Druck bricht ab
+  const k = await p.$("#eltern-knopf"); await k.evaluate((e) => e.scrollIntoView({ block: "center" })); await p.waitForTimeout(100);
+  const bb = await k.boundingBox();
+  await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down();
+  const offen = await p.waitForFunction(() => window.__PS.ui().ansicht === "eltern", null, { timeout: 5000 }).then(() => true, () => false);
+  if (!offen) console.log("Eltern-Knopf:", JSON.stringify(bb), await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return JSON.stringify({ scrollY, innerHeight, docH: document.documentElement.scrollHeight, an: e ? e.outerHTML.slice(0, 160) : null }); }, [bb.x + 10, bb.y + 10]));
+  await p.mouse.up();
 }

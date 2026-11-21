@@ -33,13 +33,27 @@ for (const [name, w, h] of GERAETE) {
       P.ok(bb && bb.x >= 0 && bb.x + bb.width <= w + 1 && bb.width >= 44 && bb.height >= 44, `${name} ${wort}/${typ}: Tippfläche zu klein oder abgeschnitten ${JSON.stringify(bb)}`);
     }
   }
-  for (const [act, wo] of [["stube", "stube"], ["freundebuch", "freundebuch"], ["lernpfad", "lernpfad"], ["ha", "hausaufgaben"], ["franz", "franz"]]) {
+  for (const [wort, typ, stufe] of [["biene", "bild-wort", 0], ["lieder", "luecke", 1], ["k-zeitung", "luecke", 0], ["schiene", "hoeren-lang", 1], ["verbieten", "reim", 0], ["frieden", "silbe", 0], ["wiese", "gross", 1], ["spazieren", "buchstaben", 1], ["schliessen", "buchstaben", 2], ["riesig", "buchstaben", 0], ["liess", "buchstaben", 2]]) {
+    await p.evaluate(([wort, typ, stufe]) => window.__PS.zeigeDe({ wort, typ, stufe, seed: 5 }), [wort, typ, stufe]);
+    await breit(`deutsch-${wort}-${typ}`);
+    for (const el of await p.$$(".option, .buchst, .hoer-knopf")) {
+      const bb = await el.boundingBox();
+      P.ok(bb && bb.x >= 0 && bb.x + bb.width <= w + 1 && bb.width >= 44 && bb.height >= 44, `${name} ${wort}/${typ}: Tippfläche zu klein oder abgeschnitten ${JSON.stringify(bb)}`);
+    }
+  }
+  for (const [act, wo] of [["stube", "stube"], ["freundebuch", "freundebuch"], ["lernpfad", "lernpfad"], ["ha", "hausaufgaben"], ["franz", "franz"], ["deutsch", "deutsch"]]) {
     await p.evaluate(() => { const u = window.__PS.ui(); u.ansicht = "start"; u.runde = null; });
     await p.click("#version"); await p.click("[data-act=dialog-zu]");
-    await p.click(act === "franz" ? "[data-act=franz]" : `.kachel[data-act=${act}]`);
+    await p.click(act === "franz" || act === "deutsch" ? `[data-act=${act}]` : `.kachel[data-act=${act}]`);
     await breit(wo);
   }
+  await p.click("[data-act=heim]"); await p.click("[data-act=franz]");
   for (const th of ["kleidung", "farben", "zahlen"]) { await p.click(`[data-act=fr-karten][data-arg=${th}]`); await breit("karten-" + th); await p.click("[data-act=franz]"); }
+  await p.click("[data-act=heim]"); await p.click("[data-act=deutsch]");
+  for (const th of ["bilder", "reime", "silben"]) { await p.click(`[data-act=de-karten][data-arg=${th}]`); await breit("de-karten-" + th); await p.click("[data-act=deutsch]"); }
+  await p.click("[data-act=de-regel]"); for (let i = 0; i <= 5; i++) { await breit("regel-" + i); await p.click("[data-act=de-regel-weiter]").catch(() => {}); }
+  await p.click("[data-act=heim]"); await p.click(".kachel[data-act=stube]"); await p.click("[data-act=stube-reiter][data-arg=wiese]"); await breit("wiese");
+  for (const el of await p.$$(".wiese-ding")) { const bb = await el.boundingBox(); P.ok(bb && bb.x >= 0 && bb.x + bb.width <= w + 1 && bb.width >= 40, `${name} Wiese: Bild abgeschnitten oder zu klein ${JSON.stringify(bb)}`); }
   P.ok(fehler.length === 0, `${name}: Fehler im Browser ${fehler.join(" | ")}`);
   await ctx.close();
 }

@@ -27,6 +27,8 @@ jobs:
         run: node tools/test-logic.mjs
       - name: Französisch (Wortliste und jede Aufgabe geprüft)
         run: node tools/test-franz.mjs
+      - name: Deutsch (Wortlisten wie im Buch und jede Aufgabe geprüft)
+        run: node tools/test-deutsch.mjs
       - name: Version und Offline-Liste
         run: node tools/test-version.mjs
       - name: Browser installieren
@@ -35,6 +37,8 @@ jobs:
         run: node tools/e2e.mjs
       - name: Französisch wie ein Kind
         run: node tools/e2e-franz.mjs
+      - name: Deutsch wie ein Kind
+        run: node tools/e2e-deutsch.mjs
       - name: Spielstand nie verlieren
         run: node tools/e2e-speicher.mjs
       - name: iPad hochkant, quer und Handy
