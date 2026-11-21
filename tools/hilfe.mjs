@@ -50,8 +50,11 @@ export async function loese(p, falsch) {
 
 // Eltern-Übersicht wie ein Erwachsener öffnen: Knopf gedrückt halten, bis die Übersicht da ist (höchstens 5 Sekunden)
 export async function elternOeffnen(p) {
-  const k = await p.$("#eltern-knopf"); await k.scrollIntoViewIfNeeded(); const bb = await k.boundingBox();
+  // In die Mitte holen: steht der Knopf am Rand, rückt die Seite beim Drücken nach und der Druck bricht ab
+  const k = await p.$("#eltern-knopf"); await k.evaluate((e) => e.scrollIntoView({ block: "center" })); await p.waitForTimeout(100);
+  const bb = await k.boundingBox();
   await p.mouse.move(bb.x + 10, bb.y + 10); await p.mouse.down();
-  await p.waitForFunction(() => window.__PS.ui().ansicht === "eltern", null, { timeout: 5000 }).catch(() => {});
+  const offen = await p.waitForFunction(() => window.__PS.ui().ansicht === "eltern", null, { timeout: 5000 }).then(() => true, () => false);
+  if (!offen) console.log("Eltern-Knopf:", JSON.stringify(bb), await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return JSON.stringify({ scrollY, innerHeight, docH: document.documentElement.scrollHeight, an: e ? e.outerHTML.slice(0, 160) : null }); }, [bb.x + 10, bb.y + 10]));
   await p.mouse.up();
 }
